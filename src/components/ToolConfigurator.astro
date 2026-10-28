@@ -1,229 +1,1333 @@
 ---
-import { MEDIA_SECTION_DATA, TOOL_OPTIONS } from "../shared/data/mediaSectionData";
+import {
+  COMPRESSOR_OPTIONS,
+  MEDIA_SECTION_DATA,
+  TOOL_OPTIONS,
+} from "../shared/data/mediaSectionData";
+import Icon from "../shared/components/Icon.astro";
 import { MODAL_DATA } from "../shared/data/modal_data";
-import Button from "../shared/components/Button.astro";
-import ConfiguratorModelStep from "./tool-configurator/ConfiguratorModelStep.astro";
-import ConfiguratorComplectationStep from "./tool-configurator/ConfiguratorComplectationStep.astro";
-import ConfiguratorResult from "./tool-configurator/ConfiguratorResult.astro";
+import { CONFIGURATOR } from "../shared/data/pageContent";
+import Sticker from "../shared/components/Sticker.astro";
+
+const complectations = TOOL_OPTIONS[0].options;
 ---
 
-<section class="configurator_root" id="tool_options" data-configurator>
-  <h3 class="configurator_main_title">Сформируйте свою конфигурацию</h3>
+<section
+  class="config"
+  id="tool_options"
+  data-configurator
+  aria-labelledby="config-title"
+>
+  <div class="container">
+    <h2 class="display-heading config-title" id="config-title">
+      <span class="heading-line">{CONFIGURATOR.TITLE}</span>{" "}
+      <Sticker tone="accent" size="heading" shape="tape" tilt="right">
+        ГЕРА<span class="brand-number">2</span>.
+      </Sticker>
+    </h2>
 
-  <ConfiguratorModelStep />
+    <ol class="stepper" aria-label="Шаги подбора">
+      <li class="is-current" data-step="1">
+        <span class="step-badge">01</span>
+        {CONFIGURATOR.STEP_MODEL}
+      </li>
+      <li class="step-line" aria-hidden="true"></li>
+      <li data-step="2">
+        <span class="step-badge">02</span>
+        {CONFIGURATOR.STEP_KIT}
+      </li>
+    </ol>
 
-  <ConfiguratorComplectationStep />
+    <div class="config-grid">
+      <form class="steps" data-config-form onsubmit="return false" novalidate>
+        <!-- Compressor -->
+        <fieldset class="group" data-compressor-step>
+          <legend class="group-title">{CONFIGURATOR.COMPRESSOR}</legend>
+          <div class="segmented">
+            {
+              COMPRESSOR_OPTIONS.filter((opt) => opt.flow !== null).map(
+                (opt) => (
+                  <label
+                    class:list={["seg", { "seg--wide": opt.flow === null }]}
+                  >
+                    <input type="radio" name="compressor" value={opt.value} />
+                    <span>{opt.label}</span>
+                  </label>
+                )
+              )
+            }
+          </div>
 
-  <ConfiguratorResult
-    toolName={TOOL_OPTIONS[0].toolName}
-    optionText={TOOL_OPTIONS[0].options[0].text}
-    optionImage={TOOL_OPTIONS[0].options[0].optionImage}
-    optionPriceBy={TOOL_OPTIONS[0].options[0].price.BY}
-    optionPriceRu={TOOL_OPTIONS[0].options[0].price.RU}
-  />
+          <div class="help-box" data-help-box hidden>
+            <p>
+              Эко — от 200 л/мин, Классик и Титан — от 300 л/мин на выходе.
+              Пришлите продавцу модель компрессора, и он подскажет аппарат.
+            </p>
+            <button
+              type="button"
+              class="help-btn"
+              data-modal-trigger={MODAL_DATA.CONTACT_MODAL_ID}
+              data-modal-name="помощь с выбором"
+              data-modal-message={CONFIGURATOR.HELP_MESSAGE}
+            >
+              Спросить продавца <Icon size={18} />
+            </button>
+          </div>
+        </fieldset>
 
-  <div class="configurator_actions_center">
-    <Button
-      data-modal-trigger={MODAL_DATA.CONTACT_MODAL_ID}
-      data-modal-name="аппарат Гера2"
-    >
-      {MEDIA_SECTION_DATA.BUTTON_TITLE}
-    </Button>
+        <!-- Model -->
+        <fieldset class="group group--list" data-model-step>
+          <legend class="visually-hidden">{CONFIGURATOR.STEP_MODEL}</legend>
+          <div class="rows">
+            {
+              TOOL_OPTIONS.map((tool, i) => (
+                <label class="row" data-model-choice={i}>
+                  <input
+                    type="radio"
+                    name="model"
+                    value={i}
+                    data-min-flow={tool.minFlow}
+                    aria-describedby={`model-reason-${i}`}
+                  />
+                  <span class="radio" aria-hidden="true" />
+                  <span class="row-body">
+                    <span class="row-title">{tool.toolName}</span>
+                    <span class="row-desc">
+                      {CONFIGURATOR.MODEL_DESCRIPTIONS[i]}
+                    </span>
+                    <span
+                      class="row-reason"
+                      id={`model-reason-${i}`}
+                      data-model-reason
+                      hidden
+                    >
+                      Недоступно: нужен компрессор от {tool.minFlow} л/мин, а
+                      выбран 200–299 л/мин.
+                    </span>
+                  </span>
+                  <span class="row-thumb" aria-hidden="true">
+                    <img
+                      src={tool.image.src}
+                      width={tool.image.width}
+                      height={tool.image.height}
+                      alt={`Пескоструйный аппарат Гера2 «${tool.toolName}»`}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </span>
+                  <span class="row-state" aria-hidden="true">
+                    Выбрано
+                  </span>
+                </label>
+              ))
+            }
+          </div>
+          <p class="row-meta t-label" data-model-meta hidden></p>
+          <p class="status" aria-live="polite" data-model-status></p>
+        </fieldset>
+
+        <!-- Complectation -->
+        <fieldset class="group group--list" data-complectation-step disabled>
+          <legend class="group-title group-title--kit">
+            {CONFIGURATOR.KIT_HEADING}
+          </legend>
+          <p class="group-hint" data-complectation-hint>
+            Сначала выберите модель — цена зависит от неё.
+          </p>
+          <div class="rows">
+            {
+              complectations.map((opt, i) => (
+                <label class="row row--kit">
+                  <input type="radio" name="kit" value={i} />
+                  <span class="radio" aria-hidden="true" />
+                  <span class="row-body">
+                    <span class="row-kit" title={opt.text}>
+                      {CONFIGURATOR.KIT_LABELS[i]}
+                    </span>
+                  </span>
+                  <span class="row-thumb row-thumb--kit" aria-hidden="true">
+                    <img
+                      src={opt.optionImage.src}
+                      width={opt.optionImage.width}
+                      height={opt.optionImage.height}
+                      alt={`Комплектация Гера2: ${opt.text}`}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </span>
+                  <span class="row-state" aria-hidden="true">
+                    Выбрано
+                  </span>
+                </label>
+              ))
+            }
+          </div>
+        </fieldset>
+
+        <details class="after-list">
+          <summary>Помощь с выбором и заявкой</summary>
+          <label class="help-compressor"
+            ><input type="radio" name="compressor" value="unknown" /> Не знаю производительность
+            компрессора</label
+          >
+          <p class="order-note">{MEDIA_SECTION_DATA.ORDER_NOTE}</p>
+          <div class="after-actions">
+            <button type="button" class="text-btn" data-copy-order disabled>
+              Скопировать текст заявки
+            </button>
+            <button type="button" class="text-btn" data-config-reset>
+              Сбросить выбор
+            </button>
+            <span class="copy-status" aria-live="polite" data-copy-status
+            ></span>
+          </div>
+        </details>
+      </form>
+
+      <!-- Summary: sticky on the right (desktop) / at the bottom (mobile) -->
+      <aside
+        class="summary on-dark"
+        id="config-summary"
+        aria-label="Итог подбора"
+        data-summary
+      >
+        <div class="sum-top">
+          <div class="sum-main">
+            <p class="sum-name">
+              <span data-sum-name>Ваш ГЕРА</span><span
+                class="sum-brand-number"
+                data-sum-brand-number>2</span
+              >
+            </p>
+            <p class="sum-sub t-label" data-sum-sub>
+              Выберите модель и комплектацию
+            </p>
+          </div>
+          <p class="sum-price" aria-live="polite">
+            <span class="visually-hidden">Цена: </span>
+            <span data-only="by" style="display: none;" data-sum-price-by
+              >—</span
+            >
+            <span data-only="other" data-sum-price-other>—</span>
+          </p>
+        </div>
+
+        <dl class="sum-list">
+          <div>
+            <dt>Компрессор</dt>
+            <dd data-sum-compressor>Не выбран</dd>
+          </div>
+          <div>
+            <dt>Модель</dt>
+            <dd data-sum-model>Не выбрана</dd>
+          </div>
+          <div>
+            <dt>Комплектация</dt>
+            <dd data-sum-kit>Не выбрана</dd>
+          </div>
+        </dl>
+
+        <button
+          type="button"
+          class="sum-order"
+          data-modal-trigger={MODAL_DATA.CONTACT_MODAL_ID}
+          data-order-button
+          data-modal-name="аппарат Гера2"
+        >
+          {MEDIA_SECTION_DATA.ORDER_TITLE}
+          <Icon size={18} />
+        </button>
+        <p class="sum-hint" data-order-hint aria-live="polite">
+          Сначала выберите модель и комплектацию
+        </p>
+        <p class="sum-caption t-label">{CONFIGURATOR.ORDER_CAPTION}</p>
+      </aside>
+    </div>
   </div>
 </section>
 
 <script>
-  import { TOOL_OPTIONS } from "../shared/data/mediaSectionData";
+  import {
+    TOOL_OPTIONS,
+    COMPRESSOR_OPTIONS,
+  } from "../shared/data/mediaSectionData";
+  import { CONFIGURATOR } from "../shared/data/pageContent";
+  import { MODAL_DATA } from "../shared/data/modal_data";
+  import { buildOrderMessage, copyText } from "../shared/utils/order";
 
-  const root = document.querySelector("[data-configurator]");
+  const root = document.querySelector<HTMLElement>("[data-configurator]");
 
   if (root) {
-    const modeCards = Array.from(
-      root.querySelectorAll("[data-mode-card]")
-    ) as HTMLButtonElement[];
-    const modeNames = Array.from(
-      root.querySelectorAll("[data-mode-name]")
-    ) as HTMLElement[];
-    const optionCards = Array.from(
-      root.querySelectorAll("[data-option-card]")
-    ) as HTMLButtonElement[];
-    const optionGroups = Array.from(
-      root.querySelectorAll("[data-tool-group]")
-    ) as HTMLElement[];
+    const form = root.querySelector<HTMLFormElement>("[data-config-form]")!;
+    const q = <T extends HTMLElement = HTMLElement>(sel: string) =>
+      root.querySelector<T>(sel);
 
-    const complectationBlock = root.querySelector(
-      "[data-complectation-block]"
-    ) as HTMLElement | null;
-    const resultBlock = root.querySelector("[data-result-block]") as HTMLElement | null;
+    const helpBox = q("[data-help-box]");
+    const modelInputs = Array.from(
+      form.querySelectorAll<HTMLInputElement>('input[name="model"]')
+    );
+    const kitStep = q<HTMLFieldSetElement>("[data-complectation-step]")!;
+    const compressorStep = q<HTMLFieldSetElement>("[data-compressor-step]")!;
+    const kitHint = q("[data-complectation-hint]");
+    const modelStatus = q("[data-model-status]");
+    const modelMeta = q("[data-model-meta]");
+    const steps = Array.from(root.querySelectorAll<HTMLElement>("[data-step]"));
 
-    const summaryToolName = root.querySelector("[data-summary-tool-name]") as
-      | HTMLElement
-      | null;
-    const summaryOptionText = root.querySelector("[data-summary-option-text]") as
-      | HTMLElement
-      | null;
-    const summaryPriceBy = root.querySelector("[data-summary-price-by]") as
-      | HTMLElement
-      | null;
-    const summaryPriceOther = root.querySelector("[data-summary-price-other]") as
-      | HTMLElement
-      | null;
-    const summaryOptionImage = root.querySelector("[data-summary-option-image]") as
-      | HTMLImageElement
-      | null;
-    const orderButton = root.querySelector("[data-modal-trigger]") as
-      | HTMLButtonElement
-      | null;
+    const sum = {
+      name: q("[data-sum-name]"),
+      sub: q("[data-sum-sub]"),
+      compressor: q("[data-sum-compressor]"),
+      model: q("[data-sum-model]"),
+      kit: q("[data-sum-kit]"),
+      priceBy: q("[data-sum-price-by]"),
+      priceOther: q("[data-sum-price-other]"),
+      order: q<HTMLButtonElement>("[data-order-button]"),
+      hint: q("[data-order-hint]"),
+      copy: q<HTMLButtonElement>("[data-copy-order]"),
+      copyStatus: q("[data-copy-status]"),
+    };
 
-    let selectedToolIndex = -1;
-    let selectedOptionIndex = -1;
+    const formatPrice = (value: number, currency: "BYN" | "RUB") =>
+      `${value.toLocaleString("ru-RU")} ${currency}`;
 
-    function renderTools() {
-      modeCards.forEach((card) => {
-        const active = Number(card.dataset.toolIndex) === selectedToolIndex;
-        card.classList.toggle("is-selected", active);
-        card.setAttribute("aria-pressed", String(active));
+    const checkedValue = (name: string) =>
+      form.querySelector<HTMLInputElement>(`input[name="${name}"]:checked`)
+        ?.value ?? null;
+
+    const isBY = () => document.documentElement.dataset.isBy === "1";
+
+    function currentState() {
+      const compressor = checkedValue("compressor");
+      const modelValue = checkedValue("model");
+      const kitValue = checkedValue("kit");
+      const toolIndex = modelValue === null ? -1 : Number(modelValue);
+      const kitIndex = kitValue === null ? -1 : Number(kitValue);
+      const tool = toolIndex >= 0 ? TOOL_OPTIONS[toolIndex] : null;
+      const kit = tool && kitIndex >= 0 ? tool.options[kitIndex] : null;
+      return { compressor, toolIndex, kitIndex, tool, kit };
+    }
+
+    function syncAvailability() {
+      const compressor = checkedValue("compressor");
+      const flow =
+        COMPRESSOR_OPTIONS.find((o) => o.value === compressor)?.flow ?? null;
+      let dropped: string | null = null;
+
+      modelInputs.forEach((input) => {
+        const minFlow = Number(input.dataset.minFlow);
+        const unavailable = flow !== null && flow < minFlow;
+        const label = input.closest<HTMLElement>("label")!;
+        const reason = label.querySelector<HTMLElement>("[data-model-reason]");
+
+        if (unavailable && input.checked) {
+          input.checked = false;
+          dropped = TOOL_OPTIONS[Number(input.value)].toolName;
+        }
+        input.disabled = unavailable;
+        label.classList.toggle("is-disabled", unavailable);
+        if (reason) reason.hidden = !unavailable;
       });
 
-      modeNames.forEach((name, nameIndex) => {
-        name.classList.toggle("is-underlined", nameIndex === selectedToolIndex);
+      if (helpBox) helpBox.hidden = compressor !== "unknown";
+
+      if (modelStatus) {
+        modelStatus.textContent = dropped
+          ? `Модель «${dropped}» недоступна для компрессора 200–299 л/мин — выбор снят.`
+          : flow === 200
+            ? "Для компрессора 200–299 л/мин доступна модель Эко"
+            : "";
+      }
+    }
+
+    function orderName() {
+      const { tool, kit, kitIndex, compressor } = currentState();
+      if (!tool || !kit) return "аппарат Гера2";
+      const price = isBY()
+        ? formatPrice(kit.price.BY, "BYN")
+        : formatPrice(kit.price.RU, "RUB");
+      const compressorLabel = COMPRESSOR_OPTIONS.find(
+        (o) => o.value === compressor
+      )?.label;
+      return [
+        `аппарат Гера2 «${tool.toolName}»`,
+        `комплектация ${kitIndex + 1}: ${kit.text}`,
+        `цена ${price}`,
+        compressorLabel && compressor !== "unknown"
+          ? `компрессор ${compressorLabel}`
+          : null,
+      ]
+        .filter(Boolean)
+        .join(", ");
+    }
+
+    function render() {
+      const { compressor, tool, kit, kitIndex, toolIndex } = currentState();
+      const compressorLabel =
+        COMPRESSOR_OPTIONS.find((o) => o.value === compressor)?.label ?? null;
+      const ready = Boolean(compressor && tool && kit);
+
+      kitStep.disabled = !tool;
+      if (kitHint) kitHint.hidden = Boolean(tool);
+
+      if (modelMeta) {
+        modelMeta.hidden = !tool;
+        modelMeta.textContent = tool
+          ? `Компрессор от ${tool.minFlow} л/мин`
+          : "";
+      }
+
+      steps.forEach((step) => {
+        const n = Number(step.dataset.step);
+        const current = tool ? 2 : 1;
+        step.classList.toggle("is-current", n === current);
+        step.classList.toggle("is-done", n < current);
+        if (n === current) step.setAttribute("aria-current", "step");
+        else step.removeAttribute("aria-current");
       });
-    }
 
-    function renderComplectation() {
-      const hasTool = selectedToolIndex >= 0;
-      if (complectationBlock) {
-        complectationBlock.hidden = !hasTool;
+      if (sum.name) {
+        sum.name.textContent = tool
+          ? `${tool.toolName}${kit ? ` · ${CONFIGURATOR.KIT_LABELS[kitIndex]}` : ""}`
+          : "Ваш ГЕРА";
+      }
+      const brandNumber = q("[data-sum-brand-number]");
+      if (brandNumber) brandNumber.hidden = Boolean(tool);
+      if (sum.sub) {
+        sum.sub.textContent = tool
+          ? `Компрессор от ${tool.minFlow} л/мин`
+          : "Выберите модель и комплектацию";
+      }
+      if (sum.compressor)
+        sum.compressor.textContent = compressorLabel ?? "Не выбран";
+      if (sum.model)
+        sum.model.textContent = tool ? tool.toolName : "Не выбрана";
+      if (sum.kit) {
+        sum.kit.textContent = kit
+          ? `Комплектация ${kitIndex + 1}. ${kit.text}`
+          : "Не выбрана";
       }
 
-      optionGroups.forEach((group) => {
-        group.hidden = Number(group.dataset.toolGroup) !== selectedToolIndex;
-      });
+      const by = kit ? formatPrice(kit.price.BY, "BYN") : "—";
+      const other = kit ? formatPrice(kit.price.RU, "RUB") : "—";
+      if (sum.priceBy) sum.priceBy.textContent = by;
+      if (sum.priceOther) sum.priceOther.textContent = other;
+
+      if (sum.order) {
+        sum.order.toggleAttribute("aria-disabled", !ready);
+        sum.order.dataset.modalName = ready ? orderName() : "аппарат Гера2";
+      }
+      if (sum.hint) {
+        sum.hint.textContent = ready
+          ? "Выбор готов — можно обсудить заказ"
+          : !compressor
+            ? "Сначала выберите компрессор или вариант «Не знаю»"
+            : tool
+              ? "Выберите комплектацию, чтобы продолжить"
+              : "Выберите модель, затем комплектацию, чтобы продолжить";
+      }
+      if (sum.copy) sum.copy.disabled = !ready;
+      if (sum.copyStatus) sum.copyStatus.textContent = "";
+
+      root!.dataset.selectedModel = String(toolIndex);
     }
 
-    function renderOptions() {
-      optionCards.forEach((card) => {
-        const cardToolIndex = Number(card.dataset.toolIndex);
-        const cardOptionIndex = Number(card.dataset.optionIndex);
-        const active =
-          cardToolIndex === selectedToolIndex &&
-          cardOptionIndex === selectedOptionIndex;
-
-        card.classList.toggle("is-selected", active);
-        card.setAttribute("aria-pressed", String(active));
-      });
-    }
-
-    function renderResult() {
-      const isReady = selectedToolIndex >= 0 && selectedOptionIndex >= 0;
-
-      if (resultBlock) {
-        resultBlock.hidden = !isReady;
-      }
-
-      if (!isReady) {
-        return;
-      }
-
-      const selectedTool = TOOL_OPTIONS[selectedToolIndex];
-      const selectedOption = selectedTool.options[selectedOptionIndex];
-
-      if (summaryToolName) summaryToolName.textContent = selectedTool.toolName;
-      if (summaryOptionText) summaryOptionText.textContent = selectedOption.text;
-      if (summaryPriceBy) summaryPriceBy.textContent = `${selectedOption.price.BY} BYN`;
-      if (summaryPriceOther) summaryPriceOther.textContent = `${selectedOption.price.RU} RUB`;
-
-      if (summaryOptionImage) {
-        summaryOptionImage.src = selectedOption.optionImage.src;
-        summaryOptionImage.width = selectedOption.optionImage.width;
-        summaryOptionImage.height = selectedOption.optionImage.height;
-        summaryOptionImage.alt = `Комплектация ${selectedOptionIndex + 1}`;
-      }
-
-      if (orderButton) {
-        orderButton.dataset.modalName = selectedTool.toolName;
-      }
-    }
-
-    function selectTool(index: number) {
-      if (selectedToolIndex !== index) {
-        selectedOptionIndex = -1;
-      }
-
-      selectedToolIndex = index;
-      renderTools();
-      renderComplectation();
-      renderOptions();
-      renderResult();
-    }
-
-    function selectOption(index: number) {
-      selectedOptionIndex = index;
-      renderOptions();
-      renderResult();
-    }
-
-    modeCards.forEach((card) => {
-      card.addEventListener("click", () => {
-        const index = Number(card.dataset.toolIndex);
-        selectTool(index);
-      });
+    form.addEventListener("change", (event) => {
+      const target = event.target as HTMLInputElement;
+      if (target.name === "compressor") syncAvailability();
+      render();
     });
 
-    optionCards.forEach((card) => {
-      card.addEventListener("click", () => {
-        if (selectedToolIndex < 0) {
-          return;
-        }
+    sum.order?.addEventListener(
+      "click",
+      (event) => {
+        const { compressor, tool, kit } = currentState();
+        if (compressor && tool && kit) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
 
-        const cardToolIndex = Number(card.dataset.toolIndex);
-        const cardOptionIndex = Number(card.dataset.optionIndex);
+        const group = !compressor
+          ? compressorStep
+          : !tool
+            ? form.querySelector<HTMLElement>("[data-model-step]")
+            : kitStep;
+        const input = !compressor
+          ? compressorStep.querySelector<HTMLInputElement>(
+              'input[name="compressor"]:not(:disabled)'
+            )
+          : !tool
+            ? modelInputs.find((candidate) => !candidate.disabled)
+            : kitStep.querySelector<HTMLInputElement>(
+                'input[name="kit"]:not(:disabled)'
+              );
+        if (!group || !input) return;
 
-        if (cardToolIndex !== selectedToolIndex) {
-          return;
-        }
+        group.classList.remove("needs-attention");
+        void group.offsetWidth;
+        group.classList.add("needs-attention");
+        group.addEventListener(
+          "animationend",
+          () => group.classList.remove("needs-attention"),
+          { once: true }
+        );
+        group.scrollIntoView({ behavior: "smooth", block: "center" });
+        window.setTimeout(() => input.focus({ preventScroll: true }), 350);
+      },
+      true
+    );
 
-        selectOption(cardOptionIndex);
-      });
+    sum.copy?.addEventListener("click", async () => {
+      const ok = await copyText(buildOrderMessage(orderName()));
+      if (sum.copyStatus) {
+        sum.copyStatus.textContent = ok
+          ? "Текст заявки скопирован"
+          : "Не удалось скопировать — текст есть в окне контактов";
+      }
     });
 
-    renderTools();
-    renderComplectation();
-    renderOptions();
-    renderResult();
+    q("[data-config-reset]")?.addEventListener("click", () => {
+      form.reset();
+      syncAvailability();
+      render();
+      form.querySelector<HTMLInputElement>("input")?.focus();
+    });
+
+    // Rows in «Под вашу задачу» preselect a model here.
+    document
+      .querySelectorAll<HTMLElement>("[data-pick-model]")
+      .forEach((link) => {
+        link.addEventListener("click", () => {
+          const input = modelInputs[Number(link.dataset.pickModel)];
+          if (input && !input.disabled) {
+            input.checked = true;
+            render();
+          }
+        });
+      });
+
+    window.addEventListener("geo:by", () => render());
+
+    syncAvailability();
+    render();
   }
 </script>
 
 <style>
-  .configurator_root {
-    margin-top: 80px;
+  .config {
+    padding-block: 56px 96px;
+    border-top: 1px solid var(--c-ink);
+  }
+
+  .config-title {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.1em 0.3em;
+    font-size: clamp(36px, 5.3vw, 76px);
+  }
+
+  .brand-number {
+    position: relative;
+    top: -0.35em;
+    margin-left: 0.04em;
+    font-size: 0.55em;
+  }
+
+  /* ——— Stepper ——— */
+  .stepper {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 28px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--c-ink);
+    font-size: 17px;
+    font-weight: 500;
+  }
+
+  .stepper li {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--c-muted);
+  }
+
+  .stepper .step-line {
+    width: 28px;
+    height: 1.5px;
+    background: var(--c-ink);
+  }
+
+  .step-badge {
+    font-family: var(--f-mono);
+    font-size: 15px;
+    padding: 3px 8px;
+  }
+
+  .stepper li.is-current,
+  .stepper li.is-done {
+    color: var(--c-ink);
+  }
+
+  .stepper li.is-current .step-badge {
+    background: var(--c-accent);
+    color: var(--c-white);
+  }
+
+  .stepper li.is-done .step-badge {
+    background: var(--c-ink);
+    color: var(--c-ivory);
+  }
+
+  /* ——— Layout ——— */
+  .config-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(340px, 420px);
+    gap: 56px;
+    align-items: start;
+    margin-top: 36px;
+  }
+
+  .steps {
     display: flex;
     flex-direction: column;
-    gap: 28px;
+    min-width: 0;
   }
 
-  .configurator_main_title {
-    font-size: 52px;
-    text-transform: uppercase;
-    color: #080808;
-    line-height: 1.1;
+  .group {
+    min-width: 0;
+    padding: 0;
+    margin: 0;
+  }
+
+  .group + .group {
+    margin-top: 28px;
+  }
+
+  .group-title {
+    padding: 0;
+    margin-bottom: 18px;
+    font-family: var(--f-heading);
+    font-weight: 600;
+    font-size: 24px;
+    line-height: 1.25;
+    letter-spacing: -0.035em;
+  }
+
+  .group-title--kit {
+    padding-top: 28px;
+    width: 100%;
+    border-top: 2px solid var(--c-ink);
+  }
+
+  .group-hint {
+    margin: -8px 0 14px;
+    color: var(--c-muted);
+    font-size: 15px;
+  }
+
+  .group-hint[hidden] {
+    display: none;
+  }
+
+  /* ——— Segmented compressor control ——— */
+  .segmented {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border: 1.5px solid var(--c-ink);
+  }
+
+  .seg {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: 52px;
+    padding: 8px 12px;
+    font-family: var(--f-mono);
+    font-size: 16px;
+    font-weight: 500;
     text-align: center;
-    text-wrap: balance;
+    cursor: pointer;
+    transition:
+      background-color var(--t) var(--ease),
+      color var(--t) var(--ease);
   }
 
-  .configurator_actions_center {
+  .seg + .seg:not(.seg--wide) {
+    border-left: 1.5px solid var(--c-ink);
+  }
+
+  .seg--wide {
+    grid-column: 1 / -1;
+    border-top: 1.5px solid var(--c-ink);
+    font-size: 15px;
+  }
+
+  .seg input,
+  .row input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    pointer-events: none;
+  }
+
+  .seg:hover {
+    background: rgb(200 194 184 / 0.35);
+  }
+
+  .seg:has(input:checked) {
+    background: var(--c-ink);
+    color: var(--c-ivory);
+  }
+
+  .seg:has(input:focus-visible),
+  .row:has(input:focus-visible) {
+    outline: 3px solid var(--c-ink);
+    outline-offset: 2px;
+    z-index: 1;
+  }
+
+  .help-box {
+    margin-top: 14px;
+    padding: 16px 18px;
+    background: var(--c-white);
+    border-left: 4px solid var(--c-accent-hover);
     display: flex;
-    justify-content: center;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 24px;
+    font-size: 15px;
   }
 
-  @media (max-width: 760px) {
-    .configurator_root {
-      margin-top: 40px;
-      gap: 24px;
+  .help-box[hidden] {
+    display: none;
+  }
+
+  .help-btn {
+    min-height: 44px;
+    padding: 0 18px;
+    border: 1.5px solid var(--c-ink);
+    background: transparent;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+  }
+
+  .help-btn:hover {
+    background: var(--c-ink);
+    color: var(--c-ivory);
+  }
+
+  /* ——— Option rows ——— */
+  .rows {
+    border-top: 1px solid var(--c-ink);
+  }
+
+  .group--list:first-of-type .rows,
+  .segmented + .help-box + .rows {
+    margin-top: 0;
+  }
+
+  .row {
+    position: relative;
+    display: grid;
+    grid-template-columns: 26px minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 22px;
+    min-height: 68px;
+    padding: 12px 16px 12px 22px;
+    border-bottom: 1px solid var(--c-ink);
+    cursor: pointer;
+    transition: background-color var(--t) var(--ease);
+  }
+
+  .row::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: -1px;
+    bottom: -1px;
+    width: 5px;
+    background: var(--c-accent);
+    transform: scaleY(0);
+    transition: transform var(--t) var(--ease);
+  }
+
+  @media (hover: hover) {
+    .row:hover {
+      background: rgb(200 194 184 / 0.25);
+    }
+  }
+
+  .radio {
+    width: 26px;
+    height: 26px;
+    border: 1.5px solid var(--c-ink);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--c-ivory);
+  }
+
+  .radio::after {
+    content: "";
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--c-accent);
+    transform: scale(0);
+    transition: transform var(--t) var(--ease);
+  }
+
+  .row-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .row-title {
+    font-family: var(--f-heading);
+    font-weight: 800;
+    font-size: 21px;
+    line-height: 1.25;
+    letter-spacing: -0.04em;
+  }
+
+  .row-desc {
+    color: var(--c-muted);
+    font-size: 15px;
+    line-height: 1.4;
+  }
+
+  .row-kicker {
+    color: var(--c-muted);
+    font-size: 12px;
+  }
+
+  .row-kit {
+    font-family: var(--f-heading);
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 1.15;
+    letter-spacing: -0.035em;
+  }
+
+  .row-thumb {
+    width: 112px;
+    height: 112px;
+    display: grid;
+    place-items: center;
+  }
+
+  .row-thumb img {
+    width: 100%;
+    height: 112px;
+    object-fit: contain;
+  }
+
+  .row-thumb--kit {
+    width: 128px;
+  }
+
+  .row-state {
+    position: absolute;
+    top: 8px;
+    right: 92px;
+    font-family: var(--f-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--c-accent);
+    opacity: 0;
+  }
+
+  /* Selected: accent bar + filled radio + «Выбрано» text (not colour only). */
+  .row:has(input:checked) .radio {
+    border-color: var(--c-accent);
+  }
+
+  .row:has(input:checked)::before {
+    transform: scaleY(1);
+  }
+
+  .row:has(input:checked) .radio::after {
+    transform: scale(1);
+  }
+
+  .row:has(input:checked) .row-state {
+    opacity: 1;
+  }
+
+  /* Disabled */
+  .row.is-disabled,
+  .group:disabled .row {
+    cursor: not-allowed;
+    background: transparent;
+  }
+
+  .row.is-disabled .row-title,
+  .row.is-disabled .row-desc,
+  .group:disabled .row-kit,
+  .group:disabled .row-kicker {
+    color: var(--c-muted);
+  }
+
+  .row.is-disabled .radio,
+  .group:disabled .radio {
+    border-style: dashed;
+    border-color: var(--c-muted);
+    background: transparent;
+  }
+
+  .row.is-disabled .row-thumb,
+  .group:disabled .row-thumb {
+    opacity: 0.35;
+    filter: grayscale(1);
+  }
+
+  .row-reason {
+    margin-top: 6px;
+    padding: 6px 10px;
+    border-left: 3px solid var(--c-accent-hover);
+    background: rgb(200 194 184 / 0.3);
+    color: var(--c-ink);
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .row-reason[hidden] {
+    display: none;
+  }
+
+  .row-meta {
+    margin-top: 14px;
+    color: var(--c-ink);
+  }
+
+  .row-meta[hidden] {
+    display: none;
+  }
+
+  .status {
+    margin-top: 10px;
+    font-size: 15px;
+  }
+
+  .status:empty {
+    display: none;
+  }
+
+  .after-list {
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--c-muted);
+  }
+  .help-compressor {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 12px 0;
+    color: var(--c-ink);
+  }
+  .help-compressor input {
+    accent-color: var(--c-accent);
+    width: 18px;
+    height: 18px;
+  }
+  .after-list summary {
+    cursor: pointer;
+  }
+  .after-list[open] .order-note {
+    margin-top: 12px;
+  }
+
+  .order-note {
+    color: var(--c-muted);
+    font-size: 15px;
+  }
+
+  .after-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 24px;
+  }
+
+  .text-btn {
+    min-height: 44px;
+    padding: 0;
+    background: none;
+    border: 0;
+    font-weight: 500;
+    font-size: 15px;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    cursor: pointer;
+  }
+
+  .text-btn:disabled {
+    color: var(--c-muted);
+    text-decoration-style: dashed;
+    cursor: not-allowed;
+  }
+
+  .copy-status {
+    font-size: 14px;
+    color: var(--c-muted);
+  }
+
+  /* ——— Summary ——— */
+  .summary {
+    position: sticky;
+    top: calc(var(--header-h) + 24px);
+    background: var(--c-ink);
+    color: var(--c-ivory);
+    padding: 26px 24px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .sum-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .sum-main {
+    min-width: 0;
+  }
+
+  .sum-name {
+    font-family: var(--f-heading);
+    font-weight: 800;
+    font-size: 22px;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+  }
+
+  .sum-sub {
+    margin-top: 4px;
+    color: var(--c-line);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-transform: none;
+  }
+
+  .sum-brand-number {
+    color: var(--c-accent);
+    font-size: 0.65em;
+    position: relative;
+    top: -0.08em;
+    margin-left: 0.03em;
+  }
+
+  .sum-price {
+    font-family: var(--f-display);
+    font-weight: 700;
+    font-size: 34px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .sum-list {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--c-graphite);
+  }
+
+  .sum-list div {
+    display: grid;
+    grid-template-columns: 112px minmax(0, 1fr);
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--c-graphite);
+  }
+
+  .sum-list dt {
+    font-family: var(--f-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--c-line);
+    padding-top: 3px;
+  }
+
+  .sum-list dd {
+    font-size: 15px;
+    line-height: 1.4;
+  }
+
+  /* Oswald 22px bold = large text: white on vermilion 3.9:1 passes AA Large. */
+  .sum-order {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 60px;
+    border: 0;
+    border-radius: 0;
+    background: var(--c-accent);
+    color: var(--c-white);
+    font-family: var(--f-condensed);
+    font-weight: 600;
+    font-size: 24px;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    transition: background-color var(--t) var(--ease);
+  }
+
+  .sum-order:hover:not(:disabled) {
+    background: var(--c-accent);
+  }
+
+  .sum-order:focus-visible {
+    outline: 3px solid var(--c-ivory);
+    outline-offset: 3px;
+  }
+
+  .sum-order:disabled {
+    background: transparent;
+    border: 1.5px dashed #6d6b64;
+    color: var(--c-line);
+    cursor: not-allowed;
+  }
+
+  .sum-order[aria-disabled="true"] {
+    background: transparent;
+    border: 1.5px dashed #6d6b64;
+    color: var(--c-line);
+  }
+
+  .sum-hint {
+    margin: 12px 0 0;
+    color: var(--c-ivory);
+    font-size: 14px;
+    line-height: 1.4;
+    text-align: center;
+  }
+
+  .sum-order[aria-disabled="true"] + .sum-hint {
+    color: var(--c-accent);
+    font-weight: 600;
+  }
+
+  .group.needs-attention {
+    animation: needs-attention 700ms ease-in-out 3;
+  }
+
+  @keyframes needs-attention {
+    0%,
+    100% {
+      outline: 0 solid transparent;
+      outline-offset: 0;
+    }
+    50% {
+      outline: 3px solid var(--c-accent);
+      outline-offset: 5px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .group.needs-attention {
+      animation: none;
+    }
+    .group.needs-attention:focus-within {
+      outline: 3px solid var(--c-accent);
+      outline-offset: 5px;
+    }
+  }
+
+  .sum-caption {
+    text-align: center;
+    color: var(--c-line);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: none;
+  }
+
+  @media (max-width: 959px) {
+    .config-grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 32px;
     }
 
-    .configurator_main_title {
-      font-size: 36px;
+    /* Compact summary pinned to the bottom while the configurator is on
+       screen; it settles in place at the end of the section. */
+    .summary {
+      position: sticky;
+      top: auto;
+      bottom: 0;
+      z-index: 20;
+      margin-inline: calc(var(--gutter) * -1);
+      padding: 18px var(--gutter) calc(14px + env(safe-area-inset-bottom));
+      gap: 14px;
+    }
+
+    .sum-list {
+      display: none;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .config {
+      padding-block: calc(10 * var(--unit)) 0;
+      border-top: 0;
+    }
+    .config-title {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.08em;
+      padding-top: 12px;
+      font-size: clamp(32px, 9.4vw, 60px);
+    }
+    .stepper {
+      margin-top: calc(15 * var(--unit));
+      font-size: calc(14 * var(--unit));
+      gap: calc(13 * var(--unit));
+      padding-bottom: calc(8 * var(--unit));
+      border-bottom-width: 1.5px;
+    }
+    .stepper li {
+      gap: calc(8 * var(--unit));
+    }
+    .stepper .step-line {
+      width: calc(17 * var(--unit));
+      height: 1px;
+    }
+    .step-badge {
+      font-size: calc(14 * var(--unit));
+      padding: calc(2 * var(--unit)) calc(7 * var(--unit));
+    }
+    .config-grid {
+      margin-top: calc(16 * var(--unit));
+      gap: calc(12 * var(--unit));
+    }
+    .group-title {
+      font-size: calc(20 * var(--unit));
+      font-weight: 700;
+      margin-bottom: calc(13 * var(--unit));
+      letter-spacing: -0.025em;
+    }
+    .seg {
+      min-height: calc(37 * var(--unit));
+      padding: 4px 8px;
+      font-size: calc(14 * var(--unit));
+      font-weight: 400;
+    }
+    .seg--wide {
+      display: none;
+    }
+    .group + .group {
+      margin-top: calc(10 * var(--unit));
+    }
+    .row {
+      grid-template-columns: calc(20 * var(--unit)) minmax(0, 1fr) auto;
+      column-gap: calc(22 * var(--unit));
+      min-height: calc(56 * var(--unit));
+      padding: calc(7 * var(--unit)) calc(10 * var(--unit));
+    }
+    .row::before {
+      left: calc(-5 * var(--unit));
+      width: calc(5 * var(--unit));
+    }
+    .radio {
+      width: calc(20 * var(--unit));
+      height: calc(20 * var(--unit));
+      border-width: 1.5px;
+    }
+    .radio::after {
+      width: calc(11 * var(--unit));
+      height: calc(11 * var(--unit));
+    }
+    .row-title {
+      font-size: calc(20 * var(--unit));
+      font-weight: 800;
+      line-height: 1.05;
+    }
+    .row-desc {
+      font-size: calc(15 * var(--unit));
+      line-height: 1.1;
+    }
+    .row-body {
+      gap: calc(3 * var(--unit));
+    }
+    .row-kit {
+      font-size: calc(17 * var(--unit));
+      font-weight: 600;
+      line-height: 1.2;
+    }
+    .row--kit {
+      min-height: calc(42 * var(--unit));
+      padding-block: calc(8 * var(--unit));
+    }
+    .row-state {
+      display: none;
+    }
+    .row-thumb,
+    .row-thumb img {
+      width: 96px;
+      height: 96px;
+    }
+    .row-thumb--kit {
+      width: 110px;
+    }
+    .row-meta {
+      margin-top: calc(8 * var(--unit));
+      font-size: calc(10 * var(--unit));
+      text-transform: none;
+      letter-spacing: 0.015em;
+      color: var(--c-muted);
+    }
+    .group-title--kit {
+      padding-top: calc(16 * var(--unit));
+      margin-top: calc(7 * var(--unit));
+      margin-bottom: calc(10 * var(--unit));
+      border-top-width: 1.5px;
+    }
+    .summary {
+      padding: calc(14 * var(--unit)) var(--gutter)
+        calc(12 * var(--unit) + env(safe-area-inset-bottom));
+      gap: calc(11 * var(--unit));
+      background: #11110f;
+    }
+    .sum-top {
+      align-items: center;
+      gap: 8px;
+    }
+    .sum-name {
+      font-size: calc(19 * var(--unit));
+      font-weight: 800;
+    }
+    .sum-sub {
+      margin-top: calc(3 * var(--unit));
+      font-size: calc(11 * var(--unit));
+      color: var(--c-ivory);
+    }
+    .sum-price {
+      font-family: var(--f-condensed);
+      font-size: calc(24 * var(--unit));
+      font-weight: 700;
+    }
+    .sum-order {
+      min-height: calc(43 * var(--unit));
+      font-size: calc(19 * var(--unit));
+    }
+    .sum-order :global(.icon) {
+      width: calc(17 * var(--unit));
+      height: calc(17 * var(--unit));
+    }
+    .sum-caption {
+      font-size: calc(9 * var(--unit));
+      line-height: 1.3;
+    }
+    .after-list {
+      margin-top: 8px;
+      font-size: 12px;
     }
   }
 </style>

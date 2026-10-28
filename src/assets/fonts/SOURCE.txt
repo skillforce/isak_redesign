@@ -1,0 +1,9 @@
+Anton Cyrillic: https://github.com/Tural/AntonFont
+Font file: fonts/Anton-Regular.ttf (unmodified)
+License: SIL Open Font License 1.1, included as OFL-Anton.txt.
+The published @fontsource/anton package supplies Latin glyphs; the local
+Cyrillic font supplies U+0400–052F. Both are served locally.
+
+The screenshots do not include font metadata. These fonts and optical
+adjustments reproduce their proportions; they are not an assertion that
+the reference was created with this exact typeface.

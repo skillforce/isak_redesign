@@ -1,0 +1,342 @@
+---
+import SandblasterSprite from "./SandblasterSprite.astro";
+
+const grains = Array.from({ length: 12 }, (_, i) => ({
+  delay: -(i * 0.037),
+  duration: 0.21 + (i % 4) * 0.045,
+  x: 13 + (i % 3) * 3,
+  y: ((i * 7) % 17) - 8,
+}));
+
+const flakes = Array.from({ length: 7 }, (_, i) => ({
+  delay: -(i * 0.061),
+  x: -7 - ((i * 5) % 18),
+  y: 10 + ((i * 11) % 27),
+}));
+---
+
+<div
+  class="blast-scroll"
+  data-blast-scroll
+  role="scrollbar"
+  tabindex="0"
+  aria-label="Прокрутка страницы"
+  aria-controls="page-content"
+  aria-orientation="vertical"
+  aria-valuemin="0"
+  aria-valuemax="100"
+  aria-valuenow="0"
+  aria-describedby="blast-scroll-help"
+  hidden
+>
+  <span class="visually-hidden" id="blast-scroll-help">
+    Перетаскивайте аппарат или используйте стрелки вверх и вниз, Page Up, Page
+    Down, Home и End.
+  </span>
+  <div class="blast-scroll__rail" data-blast-rail>
+    <div class="blast-scroll__pipe" aria-hidden="true">
+      <svg
+        class="blast-scroll__rust"
+        width="100%"
+        height="100%"
+        focusable="false"
+      >
+        <defs>
+          <pattern
+            id="blast-rust-grain"
+            width="12"
+            height="43"
+            patternUnits="userSpaceOnUse"
+          >
+            <path fill="#a34822" d="M0 0h12v43H0z"></path>
+            <path
+              fill="#74361f"
+              d="m0 4 5-4 2 9-4 5H0zm8 14 4-4v16l-5-3zM0 34l6-5 3 9-4 5H0z"
+            ></path>
+            <path
+              fill="#d77d3d"
+              d="m6 1 5 3-2 8-4-2zM1 18l4-3 3 5-3 5-4-2zm7 15 4 1v7l-5-3z"
+            ></path>
+            <path
+              d="m2 5 1 3m5 13 1 2m-5 13 1 3"
+              stroke="#eaaa64"
+              stroke-width="1.1"></path>
+            <path d="m9 8 1 5M2 27l1 4" stroke="#482c23"></path>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#blast-rust-grain)"></rect>
+      </svg>
+      <div class="blast-scroll__clean"></div>
+    </div>
+
+    <div class="blast-scroll__head" data-blast-head aria-hidden="true">
+      <span class="blast-scroll__grip"></span>
+      <SandblasterSprite class="blast-scroll__gun" />
+      <span class="blast-scroll__spray">
+        {
+          grains.map((grain) => (
+            <i
+              class="blast-scroll__grain"
+              style={`--delay:${grain.delay}s;--duration:${grain.duration}s;--grain-x:${grain.x}px;--grain-y:${grain.y}px`}
+            />
+          ))
+        }
+        {
+          flakes.map((flake) => (
+            <i
+              class="blast-scroll__flake"
+              style={`--delay:${flake.delay}s;--grain-x:${flake.x}px;--grain-y:${flake.y}px`}
+            />
+          ))
+        }
+      </span>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { useBlastScrollbar } from "../hooks/useBlastScrollbar";
+
+  const scrollbar = document.querySelector<HTMLElement>("[data-blast-scroll]");
+  if (scrollbar) useBlastScrollbar(scrollbar);
+</script>
+
+<style>
+  .blast-scroll {
+    display: none;
+  }
+
+  @media (min-width: 1024px) and (min-height: 480px) and (hover: hover) and (pointer: fine) and (forced-colors: none) {
+    :global(html.blast-scrollbar-enabled) {
+      scrollbar-width: none;
+    }
+
+    :global(html.blast-scrollbar-enabled::-webkit-scrollbar) {
+      display: none;
+      width: 0;
+    }
+
+    :global(html.blast-scrollbar-enabled body) {
+      padding-inline-end: 48px;
+    }
+
+    .blast-scroll:not([hidden]) {
+      --blast-position: 0px;
+      --blast-cleaned: 0%;
+      --blast-gun-width: clamp(54px, 5.7vw, 82px);
+      position: fixed;
+      z-index: 60;
+      inset: 0 0 0 auto;
+      display: block;
+      width: 48px;
+      color: var(--c-ink);
+      background: var(--c-ivory);
+      border-left: 1px solid var(--c-line);
+      clip-path: inset(0 -120px);
+      pointer-events: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .blast-scroll:focus-visible {
+      outline: none;
+    }
+
+    .blast-scroll__rail {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 32px;
+      height: 100vh;
+      cursor: pointer;
+      pointer-events: auto;
+      touch-action: none;
+    }
+
+    .blast-scroll__pipe {
+      position: absolute;
+      inset: 0 10px;
+      overflow: hidden;
+      border: 1px solid #4d352a;
+      border-radius: 5px;
+      box-shadow: 1px 1px 0 #fff8;
+    }
+
+    .blast-scroll__pipe::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        90deg,
+        #0004,
+        transparent 35%,
+        #fff2 55%,
+        #0004
+      );
+      pointer-events: none;
+    }
+
+    .blast-scroll__rust {
+      position: absolute;
+      inset: 0;
+    }
+
+    .blast-scroll__clean {
+      position: absolute;
+      inset: 0 0 auto;
+      height: var(--blast-cleaned, 0%);
+      background:
+        repeating-linear-gradient(0deg, #fff2 0 1px, transparent 1px 4px),
+        linear-gradient(
+          90deg,
+          #71818d 0%,
+          #d9e1e5 20%,
+          #fff 43%,
+          #e4edf2 60%,
+          #8f9da6 84%,
+          #4b5c67 100%
+        );
+    }
+
+    .blast-scroll__head {
+      position: absolute;
+      top: -22px;
+      left: 0;
+      width: 32px;
+      height: 44px;
+      transform: translate3d(0, var(--blast-position), 0);
+      cursor: grab;
+      pointer-events: auto;
+      touch-action: none;
+    }
+
+    .blast-scroll__grip {
+      position: absolute;
+      top: 8px;
+      left: 7px;
+      width: 18px;
+      height: 28px;
+      border: 1.5px solid var(--c-citron);
+      border-radius: 4px;
+      box-shadow:
+        0 0 0 1.5px var(--c-ink),
+        0 0 0 3px var(--c-ivory);
+    }
+
+    .blast-scroll:focus-visible .blast-scroll__grip {
+      outline: 2px solid var(--c-ink);
+      outline-offset: 4px;
+    }
+
+    .blast-scroll__head :global(.blast-scroll__gun) {
+      position: absolute;
+      top: calc(22px - var(--blast-gun-width) * 0.196429);
+      right: 29px;
+      width: var(--blast-gun-width);
+      height: auto;
+      max-width: none;
+      transform-origin: right 22%;
+    }
+
+    .blast-scroll__spray {
+      position: absolute;
+      top: 8px;
+      left: 0;
+      width: 40px;
+      height: 50px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 100ms linear;
+    }
+
+    .blast-scroll__grain,
+    .blast-scroll__flake {
+      position: absolute;
+      top: 14px;
+      left: 1px;
+      width: 2px;
+      height: 2px;
+      border-radius: 50%;
+      background: #d7b974;
+      animation: blast-grain var(--duration, 0.45s) var(--delay) linear infinite;
+      animation-play-state: paused;
+    }
+
+    .blast-scroll__grain:nth-child(3n) {
+      width: 1px;
+      height: 1px;
+      background: var(--c-ivory);
+    }
+
+    .blast-scroll__flake {
+      top: 15px;
+      left: 15px;
+      width: 3px;
+      height: 2px;
+      border-radius: 0;
+      background: #b55b2d;
+    }
+
+    .blast-scroll__flake:nth-child(2n) {
+      background: #6e3824;
+    }
+
+    .is-blasting .blast-scroll__spray {
+      opacity: 1;
+    }
+
+    .is-blasting .blast-scroll__grain,
+    .is-blasting .blast-scroll__flake {
+      animation-play-state: running;
+    }
+
+    .is-blasting .blast-scroll__head :global(.blast-scroll__gun) {
+      animation: blast-recoil 130ms ease-in-out infinite alternate;
+    }
+
+    .is-dragging .blast-scroll__head,
+    .is-dragging .blast-scroll__rail {
+      cursor: grabbing;
+    }
+
+    :global(body:has(.ac-modal[open])) .blast-scroll {
+      visibility: hidden;
+    }
+  }
+
+  @keyframes blast-grain {
+    0% {
+      opacity: 0;
+      transform: translate(0, 0) scale(0.6);
+    }
+    15% {
+      opacity: 1;
+    }
+    75% {
+      opacity: 0.9;
+    }
+    100% {
+      opacity: 0;
+      transform: translate(var(--grain-x), var(--grain-y)) scale(0.8);
+    }
+  }
+
+  @keyframes blast-recoil {
+    from {
+      transform: translateX(0) rotate(0);
+    }
+    to {
+      transform: translateX(-0.6px) rotate(-0.7deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .blast-scroll__spray {
+      display: none;
+    }
+
+    .blast-scroll__head :global(.blast-scroll__gun) {
+      animation: none;
+    }
+  }
+</style>

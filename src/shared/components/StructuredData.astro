@@ -1,0 +1,121 @@
+---
+/**
+ * JSON-LD для поисковых систем и AI-поиска: организация, сайт, три модели
+ * с ценами (те же, что видны в карточках моделей) и ролики YouTube.
+ */
+import { getImage } from "astro:assets";
+import {
+  MEDIA_SECTION_DATA,
+  TOOL_OPTIONS,
+  CURRENCY_CODE,
+  priceRange,
+  type Currency,
+} from "../data/mediaSectionData";
+import { MODAL_DATA } from "../data/modal_data";
+import { MODELS } from "../data/pageContent";
+import { parseYouTubeId } from "../utils/youtube";
+
+const site = Astro.site!;
+const abs = (path: string) => new URL(path, site).href;
+const orgId = abs("/#organization");
+const telephone = MODAL_DATA.CONTACTS.find((c) => c.type === "phone")!.href.replace("tel:", "");
+
+const organization = {
+  "@type": "Organization",
+  "@id": orgId,
+  name: "Гера2",
+  alternateName: ["ГЕРА₂", "Gera2", "Гера-2"],
+  legalName: MEDIA_SECTION_DATA.COMPANY_OWNER,
+  taxID: MEDIA_SECTION_DATA.OWNER_UNP.replace(/\D/g, ""),
+  url: abs("/"),
+  telephone,
+  address: { "@type": "PostalAddress", addressCountry: "BY" },
+  contactPoint: {
+    "@type": "ContactPoint",
+    contactType: "sales",
+    telephone,
+    availableLanguage: "ru",
+  },
+  sameAs: ["https://www.youtube.com/@inforoos"],
+};
+
+const website = {
+  "@type": "WebSite",
+  "@id": abs("/#website"),
+  url: abs("/"),
+  name: "Гера2",
+  inLanguage: "ru",
+  publisher: { "@id": orgId },
+};
+
+// BYN prices are shown to visitors from Belarus, RUB to everyone else.
+const offer = (tool: (typeof TOOL_OPTIONS)[number], currency: Currency) => {
+  const { min, max } = priceRange(tool, currency);
+  return {
+    "@type": "AggregateOffer",
+    priceCurrency: CURRENCY_CODE[currency],
+    lowPrice: min,
+    highPrice: max,
+    offerCount: tool.options.length,
+    seller: { "@id": orgId },
+    ...(currency === "BY" ? { eligibleRegion: { "@type": "Country", name: "BY" } } : {}),
+  };
+};
+
+const products = await Promise.all(
+  TOOL_OPTIONS.map(async (tool, i) => {
+    const image = await getImage({ src: tool.image, format: "webp", width: 800 });
+    return {
+      "@type": "Product",
+      "@id": abs(`/#model-${i + 1}`),
+      name: `Пескоструйный аппарат Гера2 «${tool.toolName}»`,
+      description: `${MODELS.DESCRIPTIONS[i]}. Требуется компрессор от ${tool.minFlow} л/мин.`,
+      image: abs(image.src),
+      brand: { "@type": "Brand", name: "Гера2" },
+      category: "Пескоструйное оборудование",
+      additionalProperty: {
+        "@type": "PropertyValue",
+        name: "Минимальная производительность компрессора",
+        value: tool.minFlow,
+        unitText: "л/мин",
+      },
+      offers: [offer(tool, "BY"), offer(tool, "RU")],
+    };
+  })
+);
+
+// Our own poster when there is one, otherwise YouTube's thumbnail.
+const videoThumbnail = async (poster: ImageMetadata | undefined, key: string) =>
+  poster
+    ? abs((await getImage({ src: poster, format: "avif", width: 1280 })).src)
+    : `https://i.ytimg.com/vi/${key}/hqdefault.jpg`;
+
+const videos = (
+  await Promise.all(
+    MEDIA_SECTION_DATA.VIDEOS.map(async (video) => {
+      const parsed = parseYouTubeId(video.id);
+      if (!parsed || !video.title || !video.uploadDate) return [];
+      return [
+        {
+          "@type": "VideoObject",
+          name: video.title,
+          description: video.title,
+          thumbnailUrl: await videoThumbnail(video.poster, parsed.key),
+          uploadDate: video.uploadDate,
+          ...(video.duration ? { duration: video.duration } : {}),
+          contentUrl: `https://www.youtube.com/watch?v=${parsed.key}`,
+          embedUrl: `https://www.youtube.com/embed/${parsed.key}`,
+          publisher: { "@id": orgId },
+        },
+      ];
+    })
+  )
+).flat();
+
+const graph = {
+  "@context": "https://schema.org",
+  "@graph": [organization, website, ...products, ...videos],
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(graph)} />

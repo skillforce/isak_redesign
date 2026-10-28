@@ -1,0 +1,17 @@
+.git
+.github
+.idea
+.claude
+.astro
+.playwright-mcp
+.pnpm-store
+node_modules
+dist
+docs
+scripts
+*.md
+.env
+.env.*
+.DS_Store
+Dockerfile
+.dockerignore

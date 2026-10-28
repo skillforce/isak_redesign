@@ -1,20 +1,40 @@
 ---
+/**
+ * YouTube facade: shows a local poster and loads the player (youtube-nocookie)
+ * only after the visitor presses play. Without a video id it renders a static
+ * preview with no player at all.
+ */
 interface Props {
-  videoId: string;
-  poster: ImageMetadata;
+  videoId?: string | null;
+  poster?: ImageMetadata;
+  fallback: ImageMetadata;
+  title: string;
+  index?: number;
+  hidden?: boolean;
 }
 
-const { videoId, poster } = Astro.props;
-const [videoKey, rawQuery = ""] = videoId.split("?");
-const embedParams = new URLSearchParams(rawQuery);
+import { Image } from "astro:assets";
+import { parseYouTubeId } from "../utils/youtube";
 
-embedParams.set("rel", "0");
-embedParams.set("modestbranding", "1");
-embedParams.set("playsinline", "1");
+const {
+  videoId,
+  poster,
+  fallback,
+  title,
+  index = 0,
+  hidden = false,
+} = Astro.props;
 
-const embedSrc = `https://www.youtube-nocookie.com/embed/${videoKey}?${embedParams.toString()}`;
+const parsed = parseYouTubeId(videoId);
+let embedSrc: string | null = null;
+if (parsed) {
+  const params = new URLSearchParams(parsed.query);
+  params.set("rel", "0");
+  params.set("modestbranding", "1");
+  params.set("playsinline", "1");
+  embedSrc = `https://www.youtube-nocookie.com/embed/${parsed.key}?${params.toString()}`;
+}
 ---
-
 
 <script is:inline>
   (() => {
@@ -46,15 +66,15 @@ const embedSrc = `https://www.youtube-nocookie.com/embed/${videoKey}?${embedPara
 
       const iframe = document.createElement("iframe");
       iframe.src = src + (src.includes("?") ? "&autoplay=1" : "?autoplay=1");
-      iframe.title = "YouTube video player";
+      iframe.title = container.dataset.title || "YouTube video player";
       iframe.allow =
         "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
       iframe.allowFullscreen = true;
-      iframe.loading = "lazy";
       iframe.referrerPolicy = "strict-origin-when-cross-origin";
 
-      container.replaceChildren(iframe);
+      container.querySelector("[data-youtube-stage]").replaceChildren(iframe);
       container.dataset.ready = "true";
+      iframe.focus();
     };
 
     document.addEventListener("pointerover", (event) => {
@@ -74,109 +94,230 @@ const embedSrc = `https://www.youtube-nocookie.com/embed/${videoKey}?${embedPara
   })();
 </script>
 
-<div class="video-embed-container" data-youtube-facade data-src={embedSrc}>
-  <button
-    type="button"
-    class="video-embed-play"
-    aria-label="Play YouTube video"
-    data-youtube-play
-  >
-    <img src={poster.src} width={poster.width} height={poster.height} alt="" loading="lazy" decoding="async" />
-    <span class="video-overlay" aria-hidden="true">
-      <span class="video-play-icon"></span>
-    </span>
-  </button>
+<div
+  class="video"
+  data-youtube-facade={embedSrc ? "" : undefined}
+  data-src={embedSrc ?? undefined}
+  data-title={title}
+  data-video-index={index}
+  hidden={hidden}
+>
+  <div class="video-stage" data-youtube-stage>
+    {
+      poster ? (
+        <Image
+          class="poster"
+          src={poster}
+          alt=""
+          widths={[640, 960, 1280, 1600]}
+          sizes="(max-width: 767px) 92vw, min(50vw, 720px)"
+          format="avif"
+          quality={70}
+          loading="lazy"
+        />
+      ) : (
+        <div
+          class="poster-bg"
+          style={`background-image:url(${fallback.src})`}
+          aria-hidden="true"
+        />
+      )
+    }
 
-  <noscript>
-    <iframe
-      title="YouTube video player"
-      src={embedSrc}
-      frameborder="0"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-      allowfullscreen
-      loading="lazy"
-      referrerpolicy="strict-origin-when-cross-origin"
-    ></iframe>
-  </noscript>
+    <span class="yt-mark" aria-hidden="true">
+      <span class="yt-icon"></span>YouTube
+    </span>
+
+    {
+      embedSrc ? (
+        <button
+          type="button"
+          class="play-button"
+          aria-label={`Смотреть на YouTube: ${title}`}
+          data-youtube-play
+        >
+          <span class="play-icon" aria-hidden="true" />
+        </button>
+      ) : (
+        <p class="no-video">
+          <span class="t-label">Видео скоро появится</span>
+        </p>
+      )
+    }
+  </div>
+
+  {
+    embedSrc && (
+      <noscript>
+        <iframe
+          title={title}
+          src={embedSrc}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+          loading="lazy"
+          referrerpolicy="strict-origin-when-cross-origin"
+        />
+      </noscript>
+    )
+  }
 </div>
 
-
 <style>
-  .video-embed-container {
-    aspect-ratio: 16 / 9;
+  .video {
+    position: relative;
     width: 100%;
-    max-width: 960px;
-    margin: 0 auto;
+    aspect-ratio: 16 / 9;
+    background: var(--c-graphite);
     overflow: hidden;
-    background: #000;
-    border-radius: 4px;
   }
 
-  .video-embed-play {
+  .video[hidden] {
+    display: none;
+  }
+
+  .video-stage {
+    position: absolute;
+    inset: 0;
+  }
+
+  /* Posters are ready-made 16:9 frames (scripts/make-video-posters.sh). */
+  .poster {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* No poster: the fallback texture fills the block, blurred and darkened. */
+  .poster-bg {
+    position: absolute;
+    inset: -40px;
+    background-size: cover;
+    background-position: center;
+    filter: blur(28px) brightness(0.55) saturate(1.1);
+  }
+
+  .yt-mark {
+    position: absolute;
+    right: 24px;
+    bottom: 22px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--f-body);
+    font-weight: 700;
+    font-size: 22px;
+    letter-spacing: -0.04em;
+    color: var(--c-white);
+    text-shadow: 0 1px 8px rgb(0 0 0 / 0.5);
+    pointer-events: none;
+  }
+
+  .yt-icon {
+    width: 30px;
+    height: 21px;
+    background: var(--c-white);
+    border-radius: 6px;
     position: relative;
+  }
+
+  .yt-icon::after {
+    content: "";
+    position: absolute;
+    left: 12px;
+    top: 6px;
+    border-style: solid;
+    border-width: 4.5px 0 4.5px 8px;
+    border-color: transparent transparent transparent var(--c-ink);
+  }
+
+  .play-button {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     border: 0;
     padding: 0;
-    display: block;
+    background: transparent;
     cursor: pointer;
-    background: #000;
-  }
-
-  .video-embed-play img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  .video-overlay {
-    position: absolute;
-    inset: 0;
     display: grid;
     place-items: center;
-    background: linear-gradient(180deg, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.45));
-    transition: background-color 0.2s ease;
   }
 
-  .video-play-icon {
-    width: 74px;
-    height: 52px;
-    border-radius: 12px;
-    background: rgba(25, 25, 25, 0.86);
+  .play-icon {
+    width: clamp(68px, 9.6vw, 136px);
+    aspect-ratio: 1.45;
+    border-radius: clamp(14px, 1.8vw, 24px);
+    background: var(--c-accent);
     position: relative;
-    transition: transform 0.2s ease, background-color 0.2s ease;
+    box-shadow: 0 6px 24px rgb(0 0 0 / 0.35);
+    transition:
+      background-color var(--t) var(--ease),
+      transform var(--t) var(--ease);
   }
 
-  .video-play-icon::before {
+  .play-icon::after {
     content: "";
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-40%, -50%);
+    transform: translate(-38%, -50%);
     border-style: solid;
-    border-width: 11px 0 11px 18px;
-    border-color: transparent transparent transparent #fff;
+    border-width: 0.9em 0 0.9em 1.5em;
+    border-color: transparent transparent transparent var(--c-white);
+    font-size: clamp(9px, 1.2vw, 17px);
   }
 
-  .video-embed-play:hover .video-overlay {
-    background: linear-gradient(180deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.38));
+  .play-button:hover .play-icon {
+    background: var(--c-accent-hover);
+    transform: scale(1.04);
   }
 
-  .video-embed-play:hover .video-play-icon {
-    background: #f00;
-    transform: scale(1.03);
+  .play-button:focus-visible {
+    outline: 3px solid var(--c-ivory);
+    outline-offset: -6px;
   }
 
-  .video-embed-play:focus-visible {
-    outline: 2px solid #fff;
-    outline-offset: -3px;
+  .no-video {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: var(--c-line);
   }
 
-  .video-embed-container :global(iframe) {
+  .no-video .t-label {
+    padding: 8px 12px;
+    border: 1px dashed var(--c-line);
+    background: var(--c-ink);
+  }
+
+  .video :global(iframe) {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
-    display: block;
     border: 0;
+  }
+
+  @media (max-width: 767px) {
+    .yt-mark {
+      right: 12px;
+      bottom: 10px;
+      font-size: 16px;
+    }
+
+    .yt-icon {
+      width: 22px;
+      height: 15px;
+      border-radius: 4px;
+    }
+
+    .yt-icon::after {
+      left: 9px;
+      top: 4px;
+      border-width: 3.5px 0 3.5px 6px;
+    }
   }
 </style>

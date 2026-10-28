@@ -1,51 +1,48 @@
-import telegramIcon from "../../assets/contact_icons/telegram.svg?raw";
-import viberIcon from "../../assets/contact_icons/viber.svg?raw";
-import phoneIcon from "../../assets/contact_icons/phone.svg?raw";
-import whatsUpIcon from "../../assets/contact_icons/watsup.svg?raw";
-
-
 export type ContactType = "whatsapp" | "viber" | "telegram" | "phone";
 
 export interface Contact {
   type: ContactType;
   href: string;
-  icon: string;
   label: string;
+  /** Короткая подпись под названием канала. */
+  note: string;
 }
 
 export interface ModalData {
   CONTACT_MODAL_ID: string;
   WELCOME_MODAL_ID: string;
+  PHONE_DISPLAY: string;
   CONTACTS: Contact[];
 }
 
-export const MODAL_DATA:ModalData = {
+export const MODAL_DATA: ModalData = {
   CONTACT_MODAL_ID: "contact_modal",
   WELCOME_MODAL_ID: "welcome_modal",
+  PHONE_DISPLAY: "+375 29 608-36-56",
   CONTACTS: [
     {
       type: "whatsapp",
       href: "https://wa.me/375296083656",
-      icon: whatsUpIcon,
       label: "WhatsApp",
+      note: "Текст заявки подставится в сообщение",
     },
     {
       type: "viber",
       href: "viber://chat?number=%2B375296083656",
-      icon: viberIcon,
       label: "Viber",
+      note: "Текст заявки подставится в сообщение",
     },
     {
       type: "telegram",
       href: "tg://resolve?domain=@voxel44",
-      icon: telegramIcon,
       label: "Telegram",
+      note: "Если текст не подставится — вставьте скопированный",
     },
     {
       type: "phone",
       href: "tel:+375296083656",
-      icon: phoneIcon,
       label: "Позвонить",
+      note: "+375 29 608-36-56",
     },
   ],
 };

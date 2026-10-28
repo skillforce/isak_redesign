@@ -1,0 +1,217 @@
+---
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<!--
+  Vector version of the real tool (assets/tool/tool.avif): chrome abrasive
+  cylinder with grey collar, blue lid and perforated base, black pistol gun
+  mounted on the collar, steel nozzle tube and looped blue air hose.
+  The nozzle tip sits at x=110, y=22 — BlastScrollbar aligns it to the rail.
+-->
+<svg
+  class={className}
+  viewBox="0 0 112 124"
+  fill="none"
+  aria-hidden="true"
+  focusable="false"
+>
+  <defs>
+    <linearGradient
+      id="blast-chrome"
+      x1="28"
+      y1="0"
+      x2="60"
+      y2="0"
+      gradientUnits="userSpaceOnUse"
+    >
+      <stop stop-color="#3d454c"></stop>
+      <stop offset=".1" stop-color="#c9d2d8"></stop>
+      <stop offset=".22" stop-color="#fff"></stop>
+      <stop offset=".3" stop-color="#8d979f"></stop>
+      <stop offset=".38" stop-color="#2b3238"></stop>
+      <stop offset=".5" stop-color="#eef3f6"></stop>
+      <stop offset=".64" stop-color="#fff"></stop>
+      <stop offset=".78" stop-color="#9aa5ad"></stop>
+      <stop offset=".9" stop-color="#d8e0e5"></stop>
+      <stop offset="1" stop-color="#474f57"></stop>
+    </linearGradient>
+    <linearGradient
+      id="blast-plastic"
+      x1="0"
+      y1="0"
+      x2="0"
+      y2="1"
+    >
+      <stop stop-color="#8a9097"></stop>
+      <stop offset=".45" stop-color="#5f656c"></stop>
+      <stop offset="1" stop-color="#3f444a"></stop>
+    </linearGradient>
+    <linearGradient
+      id="blast-gun-body"
+      x1="0"
+      y1="12"
+      x2="0"
+      y2="33"
+      gradientUnits="userSpaceOnUse"
+    >
+      <stop stop-color="#5a626b"></stop>
+      <stop offset=".25" stop-color="#2c3238"></stop>
+      <stop offset="1" stop-color="#14181c"></stop>
+    </linearGradient>
+    <linearGradient id="blast-steel" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#7b8790"></stop>
+      <stop offset=".35" stop-color="#fff"></stop>
+      <stop offset=".7" stop-color="#b9c4cb"></stop>
+      <stop offset="1" stop-color="#5c6770"></stop>
+    </linearGradient>
+  </defs>
+
+  <!-- Ivory die-cut edge keeps the little tool legible on every section. -->
+  <g fill="#f3f0e8" stroke="#f3f0e8" stroke-width="6" stroke-linejoin="round">
+    <path
+      d="M31 43C7 41 2 72 7 98C12 122 64 125 72 106C77 94 70 84 52 82"
+      fill="none"
+      stroke-width="12"
+      stroke-linecap="round"></path>
+    <path d="M8 15L19 13L73 11L86 15H110V29H86L78 31L70 44H24V118H64V44Z"
+    ></path>
+  </g>
+
+  <!-- Blue air hose looping behind the cylinder. -->
+  <path
+    d="M31 43C7 41 2 72 7 98C12 122 64 125 72 106C77 94 70 84 52 82"
+    stroke="#0f1a3d"
+    stroke-width="6"
+    stroke-linecap="round"></path>
+  <path
+    d="M31 43C7 41 2 72 7 98C12 122 64 125 72 106C77 94 70 84 52 82"
+    stroke="#1f4fe0"
+    stroke-width="4"
+    stroke-linecap="round"></path>
+  <path
+    d="M10 96C6 76 10 54 26 46"
+    stroke="#8fb0ff"
+    stroke-width="1"
+    stroke-linecap="round"></path>
+
+  <!-- Chrome abrasive cylinder with its reflections. -->
+  <rect
+    x="28"
+    y="48"
+    width="32"
+    height="56"
+    fill="url(#blast-chrome)"
+    stroke="#1b2127"
+    stroke-width="1.2"></rect>
+  <path d="M37 52V100" stroke="#20272d" stroke-width="1" opacity=".55"></path>
+  <path d="M52 52V100" stroke="#fff" stroke-width="1.4" opacity=".8"></path>
+
+  <!-- Perforated grey base. -->
+  <path
+    d="M26 98H62V113Q62 117 58 117H30Q26 117 26 113Z"
+    fill="url(#blast-plastic)"
+    stroke="#1b2127"
+    stroke-width="1.2"></path>
+  <g fill="#1c2126">
+    <ellipse cx="32" cy="107" rx="2" ry="3.2"></ellipse>
+    <ellipse cx="40" cy="108" rx="2.6" ry="3.4"></ellipse>
+    <ellipse cx="49" cy="108" rx="2.6" ry="3.4"></ellipse>
+    <ellipse cx="57" cy="107" rx="2" ry="3.2"></ellipse>
+  </g>
+
+  <!-- Grey collar with a mounting lug, blue screw lid on top. -->
+  <path
+    d="M25 44H70V52H25Z"
+    fill="url(#blast-plastic)"
+    stroke="#1b2127"
+    stroke-width="1.2"
+    stroke-linejoin="round"></path>
+  <ellipse
+    cx="43"
+    cy="44"
+    rx="17"
+    ry="4.2"
+    fill="#2e66f5"
+    stroke="#1b2127"
+    stroke-width="1"></ellipse>
+  <path d="M30 43Q42 39 56 43" stroke="#9cc0ff" stroke-width="1.2"></path>
+  <path d="M39 42H47V39.5H39Z" fill="#1f52d6"></path>
+  <!-- Hose fitting on the lid. -->
+  <path d="M28 41L33 40V44L28 45Z" fill="#c9a24a" stroke="#4a3a14" stroke-width=".6"
+  ></path>
+
+  <!-- Gun mount: hex nut on the collar lug. -->
+  <path
+    d="M57 38H69L70 44H56Z"
+    fill="#2a3036"
+    stroke="#111519"
+    stroke-width="1"></path>
+  <path d="M60 39V43M66 39V43" stroke="#5c656e" stroke-width=".8"></path>
+
+  <!-- Black pistol grip, D-loop guard and silver trigger lever. -->
+  <path
+    d="M54 30L68 30L68 38L57 38Z"
+    fill="#1a1f24"
+    stroke="#0c0f12"
+    stroke-width="1"></path>
+  <path
+    d="M50 30C42 32 42 42 52 41L57 38"
+    stroke="#0c0f12"
+    stroke-width="3.4"
+    stroke-linecap="round"></path>
+  <path
+    d="M71 30C73 34 76 37 80 38"
+    stroke="#59636c"
+    stroke-width="3.2"
+    stroke-linecap="round"></path>
+  <path
+    d="M71 30C73 34 76 37 80 38"
+    stroke="#e3e9ed"
+    stroke-width="1.6"
+    stroke-linecap="round"></path>
+  <circle cx="70.5" cy="30" r="1.6" fill="#c3ccd2" stroke="#2a3036" stroke-width=".6"
+  ></circle>
+
+  <!-- Gun body with moulded grooves. -->
+  <path
+    d="M19 14L72 11L79 15V28L70 31L54 32L46 28L20 26Z"
+    fill="url(#blast-gun-body)"
+    stroke="#0c0f12"
+    stroke-width="1.2"
+    stroke-linejoin="round"></path>
+  <path d="M23 15L71 13" stroke="#8b949c" stroke-width="1" opacity=".7"></path>
+  <path
+    d="M34 18V25M40 18V25.5M46 18V26"
+    stroke="#0a0d10"
+    stroke-width="1.6"></path>
+  <path
+    d="M35 18V24.5M41 18V25M47 18V25.5"
+    stroke="#4c555e"
+    stroke-width=".6"></path>
+
+  <!-- Quick-connect air coupler at the back. -->
+  <path
+    d="M8 16H19V24H8Z"
+    fill="url(#blast-steel)"
+    stroke="#2a3036"
+    stroke-width="1"></path>
+  <path d="M12 16V24M15 16V24" stroke="#5c6770" stroke-width=".8"></path>
+
+  <!-- Hex fitting and the long steel nozzle tube. -->
+  <path
+    d="M79 15H87V29H79Z"
+    fill="#3a4148"
+    stroke="#0c0f12"
+    stroke-width="1"></path>
+  <path d="M81 17H85" stroke="#8b949c" stroke-width="1"></path>
+  <path
+    d="M87 19.5H110V24.5H87Z"
+    fill="url(#blast-steel)"
+    stroke="#2a3036"
+    stroke-width=".8"></path>
+  <path d="M109 19.5V24.5" stroke="#111b24" stroke-width="1.6"></path>
+</svg>

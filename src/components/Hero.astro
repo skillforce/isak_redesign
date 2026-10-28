@@ -1,0 +1,389 @@
+---
+import Icon from "../shared/components/Icon.astro";
+import { HERO } from "../shared/data/pageContent";
+import Sticker from "../shared/components/Sticker.astro";
+import {
+  heroImages,
+  HERO_DESKTOP_SIZES,
+  HERO_MOBILE_MEDIA,
+  HERO_MOBILE_SIZES,
+} from "../shared/utils/heroImages";
+---
+
+<section class="hero on-accent" id="top" aria-labelledby="hero-title">
+  <div class="hero-grid">
+    <div class="hero-copy">
+      <p class="section-kicker hero-label">
+        <Sticker tone="paper" icon="target">{HERO.LABEL}</Sticker>
+      </p>
+
+      <h1 class="display-heading hero-title" id="hero-title">
+        {
+          HERO.TITLE_LINES.map((line, i) => (
+            <>
+              {i > 0 && " "}
+              {i % 2 === 0 ? (
+                <span class="heading-line">{line}</span>
+              ) : (
+                <Sticker
+                  size="heading"
+                  tone={i === 1 ? "ink" : "acid"}
+                  shape="tape"
+                  tilt={i === 1 ? "right" : "left"}
+                >
+                  {line}
+                </Sticker>
+              )}
+            </>
+          ))
+        }
+      </h1>
+
+      <p class="hero-desc">{HERO.DESCRIPTION}</p>
+
+      <div class="hero-actions">
+        <a class="hero-cta" href="#tool_options">
+          {HERO.BUTTON_TITLE}
+          <Icon />
+        </a>
+        <a class="video-link" href="#video">
+          {HERO.VIDEO_LINK_TITLE}
+          <Icon name="play" size={14} />
+        </a>
+      </div>
+
+      <p class="section-kicker hero-foot">
+        <span class="hero-index" aria-hidden="true">01</span>
+        <Sticker tone="paper" shape="tape" tilt="right" icon="check"
+          >{HERO.FOOT_LABEL.split(" / ")[1]}</Sticker
+        >
+      </p>
+    </div>
+
+    <figure class="hero-media">
+      <picture>
+        <source
+          media={HERO_MOBILE_MEDIA}
+          type="image/avif"
+          srcset={heroImages.mobileAvif}
+          sizes={HERO_MOBILE_SIZES}
+        />
+        <source
+          media={HERO_MOBILE_MEDIA}
+          type="image/webp"
+          srcset={heroImages.mobileWebp}
+          sizes={HERO_MOBILE_SIZES}
+        />
+        <source
+          type="image/avif"
+          srcset={heroImages.desktopAvif}
+          sizes={HERO_DESKTOP_SIZES}
+        />
+        <img
+          class="hero-art"
+          src={heroImages.fallbackSrc}
+          srcset={heroImages.desktopWebp}
+          sizes={HERO_DESKTOP_SIZES}
+          width={heroImages.width}
+          height={heroImages.height}
+          alt=""
+          fetchpriority="high"
+        />
+      </picture>
+      <span class="callout callout--rust" aria-hidden="true">
+        <span class="dot"></span>
+        <svg class="leader" viewBox="0 0 100 100" preserveAspectRatio="none">
+          <polyline points="0,100 40,0 100,0" vector-effect="non-scaling-stroke"
+          ></polyline>
+        </svg>
+        <span class="t-label"
+          >{HERO.CALLOUT_RUST.map((l) => <span>{l}</span>)}</span
+        >
+      </span>
+      <span class="callout callout--metal" aria-hidden="true">
+        <span class="dot"></span>
+        <svg class="leader" viewBox="0 0 100 100" preserveAspectRatio="none">
+          <polyline
+            points="0,0 40,100 100,100"
+            vector-effect="non-scaling-stroke"></polyline>
+        </svg>
+        <span class="t-label"
+          >{HERO.CALLOUT_METAL.map((l) => <span>{l}</span>)}</span
+        >
+      </span>
+      <figcaption class="visually-hidden">
+        Иллюстрация: слева — металл с коррозией, справа — очищенный участок,
+        базовый металл сохраняется.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<style>
+  .hero {
+    background: var(--c-accent);
+    color: var(--c-ivory);
+    overflow: hidden;
+  }
+  .hero-grid {
+    position: relative;
+    max-width: var(--max);
+    margin-inline: auto;
+    display: grid;
+    grid-template-columns: minmax(0, 409fr) minmax(0, 468fr);
+    gap: calc(30 * var(--unit));
+    padding: calc(33 * var(--unit)) 0 calc(33 * var(--unit)) var(--gutter);
+  }
+  .hero-copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-top: calc(14 * var(--unit));
+    position: relative;
+    z-index: 2;
+  }
+  .hero-title {
+    margin-top: calc(25 * var(--unit));
+    font-size: calc(65 * var(--unit));
+    line-height: 1.01;
+    gap: 0.015em;
+  }
+  .hero-title > .heading-line:nth-of-type(3) {
+    margin-top: 0.15em;
+  }
+  .hero-desc {
+    margin-top: calc(30 * var(--unit));
+    font-size: calc(22 * var(--unit));
+    line-height: 1.3;
+    white-space: nowrap;
+    letter-spacing: -0.02em;
+  }
+  .hero-actions {
+    margin-top: calc(28 * var(--unit));
+    display: flex;
+    align-items: center;
+    gap: calc(29 * var(--unit));
+    width: 100%;
+  }
+  .hero-cta {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: calc(10 * var(--unit));
+    min-height: calc(52 * var(--unit));
+    padding: 0 calc(29 * var(--unit));
+    background: var(--c-ivory);
+    color: var(--c-ink);
+    font-weight: 600;
+    font-size: calc(16 * var(--unit));
+    text-decoration: none;
+    white-space: nowrap;
+    transition:
+      background-color var(--t),
+      color var(--t);
+  }
+  .hero-cta:hover {
+    background: var(--c-ink);
+    color: var(--c-ivory);
+  }
+  .hero-cta :global(.icon) {
+    width: calc(16 * var(--unit));
+    height: calc(16 * var(--unit));
+  }
+  .video-link {
+    display: inline-flex;
+    align-items: center;
+    gap: calc(12 * var(--unit));
+    min-height: calc(34 * var(--unit));
+    font-size: calc(15 * var(--unit));
+    text-decoration: none;
+    white-space: nowrap;
+    border-bottom: 1px solid currentColor;
+  }
+  .video-link:hover {
+    color: var(--c-ink);
+  }
+  .video-link :global(.icon) {
+    width: calc(12 * var(--unit));
+    height: calc(12 * var(--unit));
+  }
+  .hero-foot {
+    margin-top: auto;
+    padding-top: calc(32 * var(--unit));
+    color: var(--c-ink);
+  }
+  .hero-index {
+    font-family: var(--f-heading);
+    font-size: clamp(20px, 2.4vw, 34px);
+    font-weight: 800;
+    letter-spacing: -0.07em;
+  }
+  .hero-media {
+    position: relative;
+    margin: 0;
+    overflow: hidden;
+    background: var(--c-graphite);
+    min-height: calc(570 * var(--unit));
+  }
+  .hero-art {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .callout {
+    position: absolute;
+    right: 7.5%;
+    display: flex;
+    align-items: flex-start;
+    color: var(--c-ivory);
+    pointer-events: none;
+  }
+  .callout .dot {
+    position: absolute;
+    width: calc(6 * var(--unit));
+    height: calc(6 * var(--unit));
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .callout .leader {
+    position: absolute;
+    max-width: none;
+    overflow: visible;
+  }
+  .callout .leader polyline {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.2;
+  }
+  .callout .t-label {
+    display: flex;
+    flex-direction: column;
+    width: calc(84 * var(--unit));
+    font-size: calc(10 * var(--unit));
+    line-height: 1.5;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-shadow: 0 1px 6px #17171599;
+  }
+  .callout--rust {
+    top: 10.5%;
+  }
+  .callout--rust .dot {
+    right: calc(100% + 192 * var(--unit));
+    top: calc(87 * var(--unit));
+  }
+  .callout--rust .leader {
+    right: calc(100% + 8 * var(--unit));
+    top: calc(7 * var(--unit));
+    width: calc(187 * var(--unit));
+    height: calc(84 * var(--unit));
+  }
+  .callout--metal {
+    top: 82.8%;
+  }
+  .callout--metal .dot {
+    right: calc(100% + 107 * var(--unit));
+    top: calc(-46 * var(--unit));
+  }
+  .callout--metal .leader {
+    right: calc(100% + 8 * var(--unit));
+    top: calc(-43 * var(--unit));
+    width: calc(102 * var(--unit));
+    height: calc(52 * var(--unit));
+  }
+  @media (max-width: 767px) {
+    .hero-grid {
+      display: block;
+      padding: calc(25 * var(--unit)) var(--gutter) calc(46 * var(--unit));
+      min-height: calc(569 * var(--unit));
+    }
+    .hero-copy {
+      padding-top: 0;
+    }
+    .hero-label {
+      padding-block: 2px 4px;
+    }
+    .hero-title {
+      margin-top: calc(18 * var(--unit));
+      font-size: calc(41 * var(--unit));
+    }
+    .hero-desc {
+      margin-top: calc(16 * var(--unit));
+      font-size: calc(15 * var(--unit));
+      line-height: 1.2;
+      max-width: calc(175 * var(--unit));
+      color: var(--c-ink);
+      white-space: normal;
+      letter-spacing: 0;
+    }
+    .hero-actions {
+      margin-top: calc(20 * var(--unit));
+      flex-direction: column;
+      align-items: flex-start;
+      gap: calc(15 * var(--unit));
+    }
+    .hero-cta {
+      min-height: calc(45 * var(--unit));
+      padding: 0 calc(28 * var(--unit));
+      font-family: var(--f-heading);
+      font-weight: 600;
+      font-size: calc(16 * var(--unit));
+      gap: calc(6 * var(--unit));
+    }
+    .hero-cta :global(.icon) {
+      width: calc(15 * var(--unit));
+      height: calc(15 * var(--unit));
+    }
+    .video-link {
+      font-family: var(--f-body);
+      font-weight: 500;
+      font-size: calc(14 * var(--unit));
+      min-height: calc(30 * var(--unit));
+      gap: calc(12 * var(--unit));
+    }
+    .video-link :global(.icon) {
+      width: calc(12 * var(--unit));
+      height: calc(12 * var(--unit));
+    }
+    .hero-foot {
+      display: none;
+    }
+    .hero-media {
+      position: absolute;
+      inset: calc(96 * var(--unit)) 0 0 0;
+      min-height: 0;
+      clip-path: polygon(100% 0, 100% 100%, 12% 100%);
+      z-index: 1;
+    }
+    .hero-art {
+      object-position: right bottom;
+      width: 100%;
+      object-fit: cover;
+    }
+    .callout {
+      display: flex;
+      right: calc(10 * var(--unit));
+      padding: calc(5 * var(--unit)) calc(7 * var(--unit));
+      background: rgb(23 23 21 / 0.72);
+      z-index: 2;
+    }
+    .callout .dot,
+    .callout .leader {
+      display: none;
+    }
+    .callout .t-label {
+      width: auto;
+      font-size: calc(8 * var(--unit));
+      line-height: 1.35;
+    }
+    .callout--rust {
+      top: calc(145 * var(--unit));
+    }
+    .callout--metal {
+      top: auto;
+      bottom: calc(12 * var(--unit));
+    }
+  }
+</style>

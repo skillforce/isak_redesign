@@ -1,0 +1,197 @@
+---
+/**
+ * «Как работает» — тексты без изменений из текущего сайта:
+ * MAIN_SECTION_DATA (заголовок и описание), BENEFITS_SECTION_DATA и
+ * REASON_SECTION_DATA. Номер в начале заголовка выносится в отдельную колонку,
+ * сам текст не меняется.
+ */
+import { MAIN_SECTION_DATA } from "../shared/data/mainSectionData";
+import { BENEFITS_SECTION_DATA } from "../shared/data/benefitsSectionData";
+import { REASON_SECTION_DATA } from "../shared/data/reasonSectionData";
+import Sticker from "../shared/components/Sticker.astro";
+
+const description = MAIN_SECTION_DATA.DESCRIPTION.replace(/\s+/g, " ").trim();
+const [titleLead, titleEnd] =
+  REASON_SECTION_DATA.BLOCK_TITLE.split("наш аппарат");
+const reasons = REASON_SECTION_DATA.REASONS_LIST.map((reason) => {
+  const match = reason.title.match(/^(\d+)\.\s*(.*)$/);
+  return {
+    num: match ? match[1].padStart(2, "0") : "",
+    title: match ? match[2] : reason.title,
+    content: reason.content,
+  };
+});
+---
+
+<section class="how" id="how" aria-labelledby="how-title">
+  <div class="container">
+    <p class="section-kicker">
+      <Sticker tone="paper" icon="target">Как работает</Sticker>
+    </p>
+    <div class="how-head">
+      <h2 class="display-heading how-title" id="how-title">
+        <span class="heading-line">{titleLead.trim()}</span>{" "}
+        <Sticker tone="ink" size="heading" shape="tape">наш аппарат</Sticker>{
+          " "
+        }
+        <span class="heading-line">{titleEnd.trim()}</span>
+      </h2>
+      <div class="how-intro">
+        <p class="how-sub">{MAIN_SECTION_DATA.BLOCK_TITLE}</p>
+        <p>{description}</p>
+      </div>
+    </div>
+
+    <ul class="how-benefits" aria-label="Преимущества">
+      {
+        BENEFITS_SECTION_DATA.BENEFITS_LIST_CONTENT.map((item) => (
+          <li>{item}</li>
+        ))
+      }
+    </ul>
+
+    <ol class="how-list">
+      {
+        reasons.map((reason) => (
+          <li>
+            <span class="how-num">{reason.num}</span>
+            <h3>{reason.title}</h3>
+            <p>{reason.content}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .how {
+    padding-block: clamp(72px, 9vw, 128px);
+    border-top: 1px solid var(--c-ink);
+  }
+
+  .how-head {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: 24px 64px;
+    align-items: end;
+    margin-top: 32px;
+  }
+
+  .how-title {
+    font-size: clamp(32px, 3.6vw, 52px);
+  }
+
+  .how-intro {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 16px;
+    color: var(--c-muted);
+  }
+
+  .how-sub {
+    font-family: var(--f-heading);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    color: var(--c-ink);
+  }
+
+  .how-benefits {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: 48px;
+    border-top: 1px solid var(--c-ink);
+    border-bottom: 1px solid var(--c-ink);
+  }
+
+  .how-benefits li {
+    padding: 18px 24px 18px 0;
+    font-weight: 600;
+    font-size: 17px;
+    line-height: 1.35;
+  }
+
+  .how-benefits li + li {
+    padding-left: 24px;
+    border-left: 1px solid var(--c-line);
+  }
+
+  .how-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 64px;
+    margin-top: 16px;
+  }
+
+  .how-list li {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr);
+    column-gap: 16px;
+    padding: 24px 0 28px;
+    border-bottom: 1px solid var(--c-line);
+  }
+
+  .how-list li:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+
+  .how-num {
+    font-family: var(--f-mono);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--c-accent-hover);
+    padding-top: 3px;
+  }
+
+  .how-list h3 {
+    margin: 0 0 10px;
+    font-family: var(--f-heading);
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.035em;
+  }
+
+  .how-list p {
+    grid-column: 2;
+    font-size: 16px;
+    color: var(--c-muted);
+  }
+
+  @media (max-width: 1023px) {
+    .how-head {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .how-benefits {
+      grid-template-columns: minmax(0, 1fr);
+      margin-top: 32px;
+    }
+
+    .how-benefits li,
+    .how-benefits li + li {
+      padding: 14px 0;
+      border-left: 0;
+    }
+
+    .how-benefits li + li {
+      border-top: 1px solid var(--c-line);
+    }
+
+    .how-list {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .how-list li {
+      grid-template-columns: 36px minmax(0, 1fr);
+    }
+
+    .how-list h3 {
+      font-size: 18px;
+    }
+  }
+</style>

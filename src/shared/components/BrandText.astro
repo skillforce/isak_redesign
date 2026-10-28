@@ -1,0 +1,33 @@
+---
+interface Props {
+  text: string;
+}
+const { text } = Astro.props;
+const parts = text.split(/((?:ГЕРА|Гера|гера|Gera|GERA)(?:₂|2))/g);
+---
+
+{
+  parts.map((part) =>
+    /^(?:ГЕРА|Гера|гера|Gera|GERA)(?:₂|2)$/.test(part) ? (
+      <span class="brand-word">
+        {part.slice(0, -1)}
+        <span class="brand-number">2</span>
+      </span>
+    ) : (
+      part
+    )
+  )
+}
+
+<style>
+  .brand-word {
+    white-space: nowrap;
+  }
+  .brand-number {
+    color: var(--c-accent);
+    font-size: 0.65em;
+    position: relative;
+    top: -0.08em;
+    margin-left: 0.02em;
+  }
+</style>

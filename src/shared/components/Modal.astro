@@ -7,6 +7,7 @@ import {
 
 import { MODAL_DATA } from "../data/modal_data";
 import ContactLink from "./ContactLink.astro";
+import BrandText from "./BrandText.astro";
 
 interface Props {
   id: string;
@@ -15,74 +16,107 @@ const { id } = Astro.props;
 ---
 
 <script>
-  import type { ContactType } from "../data/modal_data.ts";
+  import {
+    buildContactLink,
+    buildOrderMessage,
+    copyText,
+  } from "../utils/order";
+  import type { ContactType } from "../data/modal_data";
 
+  let currentMessage = "";
 
-  function buildMessage({ toolName }: { toolName: string }) {
-    return `Здравствуйте! Хотел бы заказать ${toolName}.`
-  }
-
-  function buildLink(type:ContactType, base:string, message:string) {
-    const text = encodeURIComponent(message);
-
-    switch (type) {
-      case "whatsapp":
-        return `${base}?text=${text}`;
-
-      case "telegram":
-        return `${base}&text=${text}&profile`;
-
-      case "viber":
-        return `${base}&draft=${text}`;
-
-      default:
-        return base;
-    }
-  }
   document.addEventListener("click", (event) => {
     const target = event.target;
     if (!(target instanceof Element)) return;
 
     const trigger = target.closest("[data-modal-trigger]");
     if (!(trigger instanceof HTMLElement)) return;
-    if (!trigger) return;
 
-    const data = {
-      toolName: trigger.dataset.modalName,
-    };
+    const toolName = trigger.dataset.modalName;
+    const explicit = trigger.dataset.modalMessage;
+    if (!toolName && !explicit) return;
 
-    if (!data.toolName) return;
+    const message = explicit || buildOrderMessage(toolName!);
+    currentMessage = message;
 
-    const message = buildMessage(data);
-    console.log(message);
+    document
+      .querySelectorAll<HTMLAnchorElement>("[data-contact-type]")
+      .forEach((link) => {
+        const type = link.dataset.contactType as ContactType | undefined;
+        const base = link.dataset.contactBase;
+        if (!type || !base) return;
+        link.href = buildContactLink(type, base, message);
+      });
 
-    document.querySelectorAll<HTMLAnchorElement>("[data-contact-type]").forEach((link) => {
-      const type = link.dataset!.contactType;
-      const base = link.dataset!.contactBase;
-      if (!type || !base) return;
-
-      link.href = buildLink(type, base, message);
-    });
+    const preview = document.querySelector<HTMLElement>("[data-order-preview]");
+    if (preview) {
+      const parts = message.split(/(Гера2)/g).map((part) => {
+        if (part !== "Гера2") return document.createTextNode(part);
+        const brand = document.createElement("span");
+        brand.className = "order-brand";
+        brand.append("Гера");
+        const number = document.createElement("span");
+        number.className = "brand-number";
+        number.textContent = "2";
+        brand.append(number);
+        return brand;
+      });
+      preview.replaceChildren(...parts);
+    }
+    const status = document.querySelector<HTMLElement>("[data-preview-status]");
+    if (status) status.textContent = "";
   });
+
+  document
+    .querySelector<HTMLButtonElement>("[data-preview-copy]")
+    ?.addEventListener("click", async () => {
+      const status = document.querySelector<HTMLElement>(
+        "[data-preview-status]"
+      );
+      const ok = currentMessage ? await copyText(currentMessage) : false;
+      if (status) {
+        status.textContent = ok
+          ? "Скопировано"
+          : "Выделите текст выше и скопируйте вручную";
+      }
+    });
 </script>
 
-
-<FreeModal id={id} class="contact_modal">
-  <ModalHeader> Наши контакты : </ModalHeader>
+<FreeModal id={id} class="contact_modal" size="lg">
+  <ModalHeader>
+    <span class="t-label modal-label">Связь с продавцом</span>
+    <span class="modal-title">Обсудить заказ</span>
+  </ModalHeader>
   <ModalBody>
     <div class="contact_modal_body">
-      {
-        MODAL_DATA.CONTACTS.map((contact) => (
-          <ContactLink
-            href={contact.href}
-            icon={contact.icon}
-            label={contact.label}
-            data-contact-type={contact.type}
-            data-contact-base={contact.href}
-
-          />
-        ))
-      }
+      <div class="preview">
+        <p class="t-label preview-label">Текст заявки</p>
+        <p class="preview-text" data-order-preview>
+          <BrandText text="Здравствуйте! Хотел бы заказать аппарат Гера2" />
+        </p>
+        <div class="preview-actions">
+          <button type="button" class="preview-copy" data-preview-copy>
+            Скопировать текст
+          </button>
+          <span class="preview-status" aria-live="polite" data-preview-status
+          ></span>
+        </div>
+      </div>
+      <ul class="contact-list">
+        {
+          MODAL_DATA.CONTACTS.map((contact) => (
+            <li>
+              <ContactLink
+                href={contact.href}
+                label={contact.label}
+                note={contact.note}
+                data-contact-type={contact.type}
+                data-contact-base={contact.href}
+              />
+            </li>
+          ))
+        }
+      </ul>
     </div>
   </ModalBody>
 </FreeModal>
@@ -187,18 +221,16 @@ const { id } = Astro.props;
       }
     };
 
-    modal
-      .querySelectorAll("[data-modal-close]")
-      .forEach((control) => {
-        control.addEventListener(
-          "touchend",
-          (event) => {
-            event.preventDefault();
-            forceClose();
-          },
-          { passive: false }
-        );
-      });
+    modal.querySelectorAll("[data-modal-close]").forEach((control) => {
+      control.addEventListener(
+        "touchend",
+        (event) => {
+          event.preventDefault();
+          forceClose();
+        },
+        { passive: false }
+      );
+    });
 
     const observer = new MutationObserver(() => {
       syncVisibilityState();
@@ -235,48 +267,131 @@ const { id } = Astro.props;
   }
 
   :global(.contact_modal) {
-    background: rgb(0, 75, 164);
-    background: -moz-radial-gradient(
-      circle,
-      rgba(0, 75, 164, 1) 3%,
-      rgba(109, 123, 240, 1) 100%
-    );
-    background: -webkit-radial-gradient(
-      circle,
-      rgba(0, 75, 164, 1) 3%,
-      rgba(109, 123, 240, 1) 100%
-    );
-    background: radial-gradient(
-      circle,
-      rgba(0, 75, 164, 1) 3%,
-      rgba(109, 123, 240, 1) 100%
-    );
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#004ba4",endColorstr="#6d7bf0",GradientType=1);
-    -webkit-box-shadow: 33px -16px 47px -1px rgba(97, 127, 244, 1);
-    -moz-box-shadow: 33px -16px 47px -1px rgba(97, 127, 244, 1);
-    box-shadow: 33px -16px 47px -1px rgba(97, 127, 244, 1);
-    opacity: 0.95;
-    border-radius: 4px;
+    background: var(--c-ivory);
+    color: var(--c-ink);
+    border-radius: 0;
+    border-top: 6px solid var(--c-accent);
+    font-family: var(--f-body);
+  }
+
+  :global(.contact_modal::backdrop) {
+    background: rgb(23 23 21 / 0.72);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 
   :global(.contact_modal .ac-modal-close) {
-    color: #ffffff;
+    color: var(--c-ink);
+    width: 44px;
+    height: 44px;
+    top: 10px;
+    right: 10px;
+    border-radius: 0;
+  }
+
+  :global(.contact_modal .ac-modal-close:hover) {
+    background: var(--c-ink);
+    color: var(--c-ivory);
   }
 
   :global(.contact_modal .ac-modal-header) {
-    color: #ffffff;
-    font-family: "Sansation", sans-serif;
-    font-weight: bold;
-    font-size: 22px;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    gap: 8px;
+    padding: 28px 28px 8px;
+  }
+
+  :global(.contact_modal .ac-modal-body) {
+    padding: 12px 28px 28px;
+  }
+
+  .modal-label {
+    color: var(--c-accent-hover);
+  }
+
+  .modal-title {
+    font-family: var(--f-heading);
+    font-weight: 800;
+    font-size: clamp(28px, 5vw, 38px);
+    line-height: 1.08;
+    letter-spacing: -0.055em;
   }
 
   .contact_modal_body {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    gap: 20px;
+  }
+
+  .preview {
+    padding: 16px;
+    background: var(--c-white);
+    border: 1px solid var(--c-line);
+  }
+
+  .preview-label {
+    color: var(--c-muted);
+    margin-bottom: 8px;
+  }
+
+  .preview-text {
+    font-size: 16px;
+    line-height: 1.5;
+    user-select: all;
+    -webkit-user-select: all;
+  }
+
+  .preview-text :global(.order-brand) {
+    white-space: nowrap;
+  }
+
+  .preview-text :global(.brand-number) {
+    color: var(--c-accent);
+    font-size: 0.65em;
+    position: relative;
+    top: -0.08em;
+  }
+
+  .preview-actions {
+    display: flex;
     align-items: center;
-    gap: 10px;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    margin-top: 8px;
+  }
+
+  .preview-copy {
+    min-height: 44px;
+    padding: 0;
+    background: none;
+    border: 0;
+    font-weight: 600;
+    font-size: 15px;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    cursor: pointer;
+  }
+
+  .preview-status {
+    font-size: 14px;
+    color: var(--c-muted);
+  }
+
+  .contact-list {
+    border-top: 2px solid var(--c-ink);
+  }
+
+  @media (max-width: 639px) {
+    :global(.contact_modal .ac-modal-header) {
+      padding: 24px 16px 4px;
+    }
+
+    :global(.contact_modal .ac-modal-body) {
+      padding: 12px 16px 24px;
+    }
+
+    .modal-title {
+      font-size: 34px;
+    }
   }
 </style>

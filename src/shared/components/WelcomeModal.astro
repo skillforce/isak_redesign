@@ -23,16 +23,18 @@ const { id } = Astro.props;
         cookie.
       </div>
       <div class="welcome_modal_text">
-        Нажимая «Принять» или пользуясь этим сайтом, вы даёте согласие на обработку персональных данных и
-        файлов cookie в соответствии с{" "}
+        Нажимая «Принять» или пользуясь этим сайтом, вы даёте согласие на
+        обработку персональных данных и файлов cookie в соответствии с{" "}
         <a href={politicsPdf} target="_blank" rel="noopener noreferrer">
           Политикой обработки
-        </a>
+        </a>{" "}
         этих данных.
       </div>
     </div>
     <div class="welcome_modal_button_container">
-      <button class="accept_button" data-modal-close>Принять</button>
+      <button type="button" class="accept_button" data-modal-close
+        >Принять</button
+      >
     </div>
   </ModalBody>
 </FreeModal>
@@ -138,18 +140,16 @@ const { id } = Astro.props;
       }
     };
 
-    modal
-      .querySelectorAll("[data-modal-close]")
-      .forEach((control) => {
-        control.addEventListener(
-          "touchend",
-          (event) => {
-            event.preventDefault();
-            forceClose();
-          },
-          { passive: false }
-        );
-      });
+    modal.querySelectorAll("[data-modal-close]").forEach((control) => {
+      control.addEventListener(
+        "touchend",
+        (event) => {
+          event.preventDefault();
+          forceClose();
+        },
+        { passive: false }
+      );
+    });
 
     const observer = new MutationObserver(() => {
       syncVisibilityState();
@@ -185,65 +185,118 @@ const { id } = Astro.props;
     display: none !important;
   }
 
-  :global(.welcome_modal) {
-    background: rgb(0, 75, 164);
-    background: radial-gradient(
-      circle,
-      rgba(0, 75, 164, 1) 3%,
-      rgba(109, 123, 240, 1) 100%
-    );
-    opacity: 0.95;
-    border-radius: 4px;
+  :global(dialog.welcome_modal) {
+    --ac-modal-background-color: #fffdf8;
+    background: #fffdf8;
+    color: #111110;
+    border-radius: 0;
+    border-top: 6px solid var(--c-accent);
+    font-family: var(--f-body);
+  }
+
+  :global(.welcome_modal::backdrop) {
+    background: rgb(8 8 7 / 0.72);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 
   :global(.welcome_modal .ac-modal-close) {
-    color: #ffffff;
+    color: #111110;
+    width: 44px;
+    height: 44px;
+    top: 10px;
+    right: 10px;
+    border-radius: 0;
+  }
+
+  :global(.welcome_modal .ac-modal-close:hover) {
+    background: var(--c-graphite);
+    color: var(--c-ivory);
   }
 
   :global(.welcome_modal .ac-modal-header) {
-    color: #ffffff;
-    font-family: "Sansation", sans-serif;
-    font-weight: bold;
-    font-size: 22px;
-    display: flex;
-    justify-content: center;
+    color: #111110;
+    font-family: var(--f-heading);
+    font-weight: 800;
+    font-size: 28px;
+    line-height: 1.2;
+    letter-spacing: -0.04em;
+    text-transform: none;
+    padding: 28px 64px 8px 28px;
+  }
+
+  :global(.welcome_modal .ac-modal-body) {
+    color: #111110;
+    background: #fffdf8;
+    padding: 12px 28px 28px;
   }
 
   .welcome_modal_body {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
-    gap: 5px;
-    padding: 15px 0;
-    letter-spacing: 1px;
+    gap: 14px;
+    padding: 0 0 20px;
   }
 
   .welcome_modal_text {
-    color: #ffffff;
-    font-size: 18px;
-    text-align: start;
-    text-wrap: balance;
-
+    color: #222220;
+    font-family: "Golos Text", sans-serif;
+    font-size: 17px;
+    line-height: 1.6;
   }
 
   .welcome_modal_text a {
-    color: #ffffff;
-    font-size: 19px;
-    font-weight: bold;
+    color: #111110;
+    font-weight: 600;
     text-decoration: underline;
+    text-underline-offset: 3px;
   }
+
   .welcome_modal_button_container {
     display: flex;
-    justify-content: center;
   }
 
   .accept_button {
-    color: rgb(0, 75, 164);
-    font-weight: 600;
-    padding: 5px 10px;
-    border-radius: 4px;
-    cursor: pointer;
+    min-height: 48px;
+    padding: 12px 28px;
+    border: 0;
+    border-radius: 0;
+    background: #111110;
+    color: #ffffff;
+    font-weight: 700;
     font-size: 18px;
+    cursor: pointer;
+    transition:
+      background-color var(--t) var(--ease),
+      color var(--t) var(--ease);
+  }
+
+  .accept_button:hover {
+    background: #30302c;
+    color: var(--c-white);
+  }
+
+  .accept_button:focus-visible {
+    outline: 3px solid #111110;
+    outline-offset: 3px;
+  }
+
+  @media (max-width: 639px) {
+    :global(.welcome_modal .ac-modal-header) {
+      font-size: 25px;
+      padding: 24px 52px 8px 20px;
+    }
+
+    :global(.welcome_modal .ac-modal-body) {
+      padding: 12px 20px 24px;
+    }
+
+    .welcome_modal_text {
+      font-size: 16px;
+    }
+
+    .accept_button {
+      width: 100%;
+    }
   }
 </style>

@@ -1,0 +1,285 @@
+<!doctype html>
+<!--
+  Poster template for scripts/make-video-posters.sh, rendered at 1600x900 by
+  headless Chrome. Query: ?n=<1-based video>&before=<file url>&after=<file url>.
+  The centre stays calm: the site draws its play button over it.
+-->
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      @font-face {
+        font-family: "Golos Text";
+        font-weight: 800;
+        src: url("../../node_modules/@fontsource/golos-text/files/golos-text-cyrillic-800-normal.woff2");
+      }
+      @font-face {
+        font-family: "Golos Text";
+        font-weight: 600;
+        src: url("../../node_modules/@fontsource/golos-text/files/golos-text-cyrillic-600-normal.woff2");
+      }
+      @font-face {
+        font-family: "IBM Plex Mono";
+        font-weight: 600;
+        src: url("../../node_modules/@fontsource/ibm-plex-mono/files/ibm-plex-mono-cyrillic-600-normal.woff2");
+      }
+
+      :root {
+        --c-accent: #f03510;
+        --c-ivory: #f3f0e8;
+        --c-ink: #080807;
+        --c-graphite: #30302c;
+        --c-line: #c8c2b8;
+        --c-citron: #def266;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+      }
+
+      html,
+      body {
+        width: 1600px;
+        height: 900px;
+        overflow: hidden;
+        background: var(--c-ink);
+      }
+
+      .poster {
+        position: relative;
+        width: 1600px;
+        height: 900px;
+        overflow: hidden;
+        color: var(--c-ivory);
+        font-family: "Golos Text", sans-serif;
+        background:
+          radial-gradient(circle at 78% 40%, #30302c 0, transparent 55%),
+          repeating-linear-gradient(90deg, #ffffff07 0 1px, transparent 1px 80px),
+          repeating-linear-gradient(0deg, #ffffff07 0 1px, transparent 1px 80px),
+          var(--c-ink);
+      }
+
+      /* Red blast slab behind the photos. */
+      .slab {
+        position: absolute;
+        top: -60px;
+        right: -120px;
+        width: 760px;
+        height: 1020px;
+        background: var(--c-accent);
+        clip-path: polygon(22% 0, 100% 0, 100% 100%, 0 100%);
+      }
+
+      .brand {
+        position: absolute;
+        top: 64px;
+        left: 72px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 24px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--c-line);
+      }
+
+      .brand b {
+        font-family: "Golos Text", sans-serif;
+        font-weight: 800;
+        font-size: 44px;
+        letter-spacing: -0.04em;
+        color: var(--c-ivory);
+      }
+
+      .brand i {
+        width: 10px;
+        height: 10px;
+        background: var(--c-accent);
+        font-style: normal;
+      }
+
+      .copy {
+        position: absolute;
+        left: 72px;
+        bottom: 76px;
+        width: 590px;
+      }
+
+      .title {
+        font-size: 104px;
+        font-weight: 800;
+        line-height: 0.98;
+        letter-spacing: -0.06em;
+      }
+
+      .tape {
+        display: inline-block;
+        margin-top: 10px;
+        padding: 0 26px 14px 18px;
+        color: var(--c-ink);
+        background: var(--c-citron);
+        clip-path: polygon(2% 9%, 97% 0, 100% 15%, 99% 92%, 3% 100%, 0 84%);
+        transform: rotate(-1.5deg);
+      }
+
+      .lead {
+        margin-top: 40px;
+        font-size: 30px;
+        line-height: 1.32;
+        color: #f3f0e8d9;
+      }
+
+      .steps {
+        display: grid;
+        gap: 14px;
+        margin-top: 40px;
+        padding: 0;
+        list-style: none;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 23px;
+        font-weight: 600;
+        line-height: 1.25;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+      }
+
+      .steps li {
+        display: flex;
+        gap: 16px;
+      }
+
+      .steps span {
+        flex: none;
+        color: var(--c-citron);
+      }
+
+      .card {
+        position: absolute;
+        top: 120px;
+        width: 330px;
+        height: 586px;
+        border: 8px solid var(--c-ivory);
+        background: var(--c-graphite);
+        box-shadow: 12px 14px 0 var(--c-ink);
+      }
+
+      .card img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .card--before {
+        left: 990px;
+        transform: rotate(-4deg);
+      }
+
+      .card--after {
+        top: 180px;
+        left: 1222px;
+        transform: rotate(3deg);
+      }
+
+      .label {
+        position: absolute;
+        left: -18px;
+        bottom: 34px;
+        padding: 6px 18px 10px;
+        font-size: 36px;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        color: var(--c-ink);
+        background: var(--c-ivory);
+        box-shadow: 4px 5px 0 var(--c-ink);
+        transform: rotate(-3deg);
+      }
+
+      .card--after .label {
+        background: var(--c-citron);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="poster">
+      <div class="slab"></div>
+
+      <p class="brand">
+        <b>ГЕРА₂</b><i></i><span id="meta"></span>
+      </p>
+
+      <section class="copy">
+        <h1 class="title" id="title"></h1>
+        <p class="lead" id="lead"></p>
+        <ol class="steps" id="steps"></ol>
+      </section>
+
+      <figure class="card card--before">
+        <img id="before" alt="" />
+        <figcaption class="label">До</figcaption>
+      </figure>
+      <figure class="card card--after">
+        <img id="after" alt="" />
+        <figcaption class="label">После</figcaption>
+      </figure>
+    </main>
+
+    <script>
+      const VIDEOS = [
+        {
+          meta: "Ролик 01 · 2 мин",
+          title: ["Ржавчина", "до металла"],
+          lead: "Лист с пятном ржавчины зажат в тисках — аппарат снимает её до чистого металла.",
+          steps: [
+            "Абразив — в бачок",
+            "Воздух — от компрессора",
+            "Ржавчина снята до металла",
+          ],
+        },
+        {
+          meta: "Ролик 02 · 56 сек",
+          title: ["Суппорт", "без налёта"],
+          lead: "Тонкая трубка заходит в цилиндр суппорта и очищает кромку под поршневое кольцо.",
+          steps: [
+            "Тормозной суппорт",
+            "Кромка поршневого кольца",
+            "Очистка внутри цилиндра",
+          ],
+        },
+      ];
+
+      // Request the fonts up front: headless Chrome loads them lazily and
+      // may take the screenshot before the display face arrives.
+      for (const font of [
+        '800 104px "Golos Text"',
+        '600 30px "Golos Text"',
+        '600 23px "IBM Plex Mono"',
+      ])
+        document.fonts.load(font, "ЖЁ");
+
+      const params = new URLSearchParams(location.search);
+      const video = VIDEOS[Number(params.get("n") || 1) - 1];
+      const title = document.getElementById("title");
+      const tape = document.createElement("span");
+      tape.className = "tape";
+      tape.textContent = video.title[1];
+      title.append(video.title[0], document.createElement("br"), tape);
+      document.getElementById("meta").textContent = video.meta;
+      document.getElementById("lead").textContent = video.lead;
+      document.getElementById("steps").append(
+        ...video.steps.map((text, i) => {
+          const item = document.createElement("li");
+          const number = document.createElement("span");
+          number.textContent = String(i + 1).padStart(2, "0");
+          item.append(number, text);
+          return item;
+        })
+      );
+      document.getElementById("before").src = params.get("before");
+      document.getElementById("after").src = params.get("after");
+    </script>
+  </body>
+</html>

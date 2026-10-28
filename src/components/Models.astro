@@ -1,0 +1,258 @@
+---
+import {
+  TOOL_OPTIONS,
+  formatPrice,
+  priceRange,
+} from "../shared/data/mediaSectionData";
+import Icon from "../shared/components/Icon.astro";
+import { MODELS } from "../shared/data/pageContent";
+import BrandText from "../shared/components/BrandText.astro";
+import Sticker from "../shared/components/Sticker.astro";
+
+const [modelCount, modelPromise] = MODELS.LABEL.split(". ");
+---
+
+<section class="models" id="models" aria-labelledby="models-title">
+  <div class="container">
+    <p class="section-kicker">
+      <Sticker tone="acid" icon="arrow">{modelCount}</Sticker>
+      <span>{modelPromise}</span>
+    </p>
+    <header class="models-head">
+      <h2 class="display-heading models-title" id="models-title">
+        <span class="heading-line">{MODELS.TITLE[0]}</span>{" "}
+        <Sticker tone="ink" size="heading" icon="arrow"
+          >{MODELS.TITLE[1]}</Sticker
+        >
+      </h2>
+      <p class="models-note"><BrandText text={MODELS.NOTE} /></p>
+    </header>
+
+    <ol class="model-list">
+      {
+        TOOL_OPTIONS.map((tool, i) => {
+          return (
+            <li class="model-row" data-model-row={i}>
+              <span class="model-num">{String(i + 1).padStart(2, "0")}</span>
+              <span class="model-bar" aria-hidden="true" />
+              <h3 class="model-name">{tool.toolName}</h3>
+              <p class="model-desc">{MODELS.DESCRIPTIONS[i]}</p>
+              <div class="model-meta">
+                <p class="model-spec">
+                  <span class="t-label">{MODELS.SPEC_LABEL}</span>
+                  <span class="model-flow">от {tool.minFlow} л/мин</span>
+                </p>
+                <p class="model-spec">
+                  <span class="t-label">{MODELS.PRICE_LABEL}</span>
+                  {/* Same geo switch as the configurator price: index.astro toggles [data-only]. */}
+                  <span
+                    class="model-flow"
+                    data-only="by"
+                    style="display: none;"
+                  >
+                    от {formatPrice(priceRange(tool, "BY").min, "BY")}
+                  </span>
+                  <span class="model-flow" data-only="other">
+                    от {formatPrice(priceRange(tool, "RU").min, "RU")}
+                  </span>
+                </p>
+              </div>
+              <a
+                class="model-pick"
+                href="#tool_options"
+                data-pick-model={i}
+                aria-label={`Выбрать ГЕРА₂ «${tool.toolName}» в конфигураторе`}
+              >
+                <Icon name="arrow-right" size={28} />
+              </a>
+            </li>
+          );
+        })
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .models {
+    padding-block: calc(28 * var(--unit)) calc(35 * var(--unit));
+  }
+  .models-head {
+    display: grid;
+    grid-template-columns: minmax(0, 560fr) minmax(0, 282fr);
+    gap: calc(30 * var(--unit));
+    align-items: center;
+    margin: calc(22 * var(--unit)) 0 calc(28 * var(--unit));
+  }
+  .models-title {
+    font-size: calc(62 * var(--unit));
+  }
+  .models-note {
+    font-size: calc(14 * var(--unit));
+    line-height: 1.3;
+    padding-top: calc(12 * var(--unit));
+  }
+  .model-list {
+    border-top: 1px solid var(--c-ink);
+  }
+  .model-row {
+    position: relative;
+    display: grid;
+    grid-template-columns:
+      calc(40 * var(--unit)) 1px minmax(0, 161fr) minmax(0, 281fr)
+      minmax(0, 209fr) calc(54 * var(--unit));
+    grid-template-areas: "num bar name desc spec pick";
+    align-items: center;
+    column-gap: calc(23 * var(--unit));
+    min-height: calc(88 * var(--unit));
+    border-bottom: 1px solid var(--c-ink);
+    padding-block: calc(13 * var(--unit));
+  }
+  .model-num {
+    grid-area: num;
+    font-family: var(--f-condensed);
+    font-size: calc(20 * var(--unit));
+    font-weight: 500;
+  }
+  .model-bar {
+    grid-area: bar;
+    width: 1px;
+    height: calc(30 * var(--unit));
+    background: currentColor;
+  }
+  .model-name {
+    grid-area: name;
+    margin: 0;
+    padding-left: calc(8 * var(--unit));
+    font-family: var(--f-heading);
+    font-weight: 800;
+    font-size: calc(30 * var(--unit));
+    line-height: 1;
+    letter-spacing: -0.055em;
+  }
+  .model-desc {
+    grid-area: desc;
+    font-size: calc(14 * var(--unit));
+    line-height: 1.25;
+    max-width: 21em;
+  }
+  .model-meta {
+    grid-area: spec;
+    display: flex;
+    flex-direction: column;
+    gap: calc(8 * var(--unit));
+  }
+  .model-spec {
+    display: flex;
+    flex-direction: column;
+    gap: calc(2 * var(--unit));
+  }
+  .model-spec .t-label {
+    font-size: calc(9 * var(--unit));
+    font-weight: 500;
+    letter-spacing: 0.07em;
+  }
+  .model-flow {
+    font-size: calc(16 * var(--unit));
+    line-height: 1.3;
+  }
+  .model-pick {
+    grid-area: pick;
+    display: grid;
+    place-items: center;
+    width: calc(54 * var(--unit));
+    height: calc(54 * var(--unit));
+    border: 1px solid var(--c-ink);
+    color: var(--c-ink);
+    transition:
+      background-color var(--t),
+      color var(--t);
+  }
+  .model-pick :global(.icon) {
+    width: calc(27 * var(--unit));
+    height: calc(27 * var(--unit));
+  }
+  .model-pick::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+  .model-list:not(:hover):not(:focus-within) .model-row:nth-child(2),
+  .model-row:hover,
+  .model-row:focus-within {
+    --row-accent: var(--c-accent);
+  }
+  .model-num,
+  .model-name,
+  .model-bar {
+    color: var(--row-accent, var(--c-ink));
+  }
+  .model-list:not(:hover):not(:focus-within)
+    .model-row:nth-child(2)
+    .model-pick,
+  .model-row:hover .model-pick,
+  .model-row:focus-within .model-pick {
+    background: var(--c-accent);
+    border-color: var(--c-accent);
+    color: var(--c-ivory);
+  }
+  @media (max-width: 767px) {
+    .models {
+      padding-block: 24px 40px;
+    }
+    .models-head {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 20px;
+      margin: 24px 0 28px;
+    }
+    .models-title {
+      font-size: clamp(36px, 10.5vw, 60px);
+    }
+    .models-note {
+      font-size: 16px;
+      padding: 0;
+      max-width: 25em;
+    }
+    .model-row {
+      grid-template-columns: 28px minmax(0, 1fr) 44px;
+      grid-template-areas: "num name pick" ". desc desc" ". spec spec";
+      column-gap: 12px;
+      row-gap: 10px;
+      min-height: 0;
+      padding-block: 18px;
+    }
+    .model-bar {
+      display: none;
+    }
+    .model-num {
+      font-size: 17px;
+    }
+    .model-name {
+      font-size: 28px;
+      padding: 0;
+    }
+    .model-desc {
+      font-size: 15px;
+    }
+    .model-spec {
+      flex-direction: row;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 2px 10px;
+    }
+    .model-spec .t-label {
+      font-size: 10px;
+    }
+    .model-flow {
+      font-size: 15px;
+    }
+    .model-pick {
+      width: 44px;
+      height: 44px;
+    }
+    .model-pick :global(.icon) {
+      width: 24px;
+      height: 24px;
+    }
+  }
+</style>

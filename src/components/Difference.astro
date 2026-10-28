@@ -1,0 +1,229 @@
+---
+/**
+ * «Чем мы отличаемся от конкурентов?» — та же сетка и типографика,
+ * что и в «Как работает», плюс итоговая фраза крупным шрифтом.
+ */
+import BrandText from "../shared/components/BrandText.astro";
+import { DIFFERENCE_SECTION_DATA } from "../shared/data/differenceSectionData";
+import Sticker from "../shared/components/Sticker.astro";
+
+const [titleLead, titleEnd] = DIFFERENCE_SECTION_DATA.BLOCK_TITLE.split(" от ");
+---
+
+<section class="diff" id="difference" aria-labelledby="difference-title">
+  <div class="container">
+    <p class="section-kicker">
+      <Sticker tone="accent" icon="check" tilt="right"
+        >{DIFFERENCE_SECTION_DATA.LABEL}</Sticker>
+    </p>
+    <div class="diff-head">
+      <h2 class="display-heading diff-title" id="difference-title">
+        <span class="heading-line">{titleLead}</span>{" "}
+        <Sticker tone="paper" size="heading" shape="tape" tilt="right"
+          >от {titleEnd}</Sticker
+        >
+      </h2>
+      <p class="diff-intro">{DIFFERENCE_SECTION_DATA.INTRO}</p>
+    </div>
+
+    <ol class="diff-list">
+      {
+        DIFFERENCE_SECTION_DATA.POINTS.map((point, i) => (
+          <li>
+            <span class="diff-num">{String(i + 1).padStart(2, "0")}</span>
+            <h3>{point.title}</h3>
+            <p>{point.content}</p>
+          </li>
+        ))
+      }
+    </ol>
+
+    <div class="diff-hatch" aria-hidden="true"></div>
+
+    <div class="diff-summary-wrap">
+      <p class="diff-summary">
+        <BrandText text={DIFFERENCE_SECTION_DATA.SUMMARY} />
+      </p>
+      <span class="diff-corner" aria-hidden="true"></span>
+    </div>
+  </div>
+</section>
+
+<style>
+  .diff {
+    padding-block: clamp(72px, 9vw, 128px);
+    border-top: 1px solid var(--c-ink);
+  }
+
+  .diff-head {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: 24px 64px;
+    align-items: end;
+    margin-top: 32px;
+  }
+
+  .diff-title {
+    font-size: clamp(32px, 3.6vw, 52px);
+  }
+
+  .diff-intro {
+    font-size: 16px;
+    color: var(--c-muted);
+  }
+
+  .diff-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: 48px;
+    border-top: 1px solid var(--c-ink);
+    border-bottom: 1px solid var(--c-ink);
+  }
+
+  .diff-list li {
+    position: relative;
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    column-gap: 16px;
+    padding: 32px 28px 32px 0;
+  }
+
+  .diff-list li + li {
+    padding-left: 28px;
+    border-left: 1px solid var(--c-line);
+  }
+
+  /* Red tab sitting on the top rule of each point. */
+  .diff-list li::before {
+    content: "";
+    position: absolute;
+    top: -3px;
+    left: 0;
+    width: 48px;
+    height: 5px;
+    background: var(--c-accent);
+  }
+
+  .diff-list li + li::before {
+    left: 28px;
+  }
+
+  .diff-num {
+    font-family: var(--f-mono);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--c-accent-hover);
+    padding-top: 3px;
+  }
+
+  .diff-list h3 {
+    margin: 0 0 10px;
+    font-family: var(--f-heading);
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.035em;
+  }
+
+  .diff-list p {
+    grid-column: 2;
+    font-size: 16px;
+    color: var(--c-muted);
+  }
+
+  /* Diagonal hatching, like marking on a metal plate. */
+  .diff-hatch {
+    height: 14px;
+    margin-top: 48px;
+    background: repeating-linear-gradient(
+      -45deg,
+      var(--c-ink) 0 2px,
+      transparent 2px 10px
+    );
+  }
+
+  .diff-summary-wrap {
+    position: relative;
+    margin-top: 40px;
+    padding: 8px 0 8px 28px;
+    border-left: 6px solid var(--c-accent);
+  }
+
+  /* Same diagonal cut as the hero image. */
+  .diff-corner {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: clamp(120px, 16vw, 220px);
+    height: 100%;
+    background: var(--c-accent);
+    clip-path: polygon(100% 0, 100% 100%, 0 100%);
+  }
+
+  .diff-summary {
+    position: relative;
+    max-width: 22em;
+    font-family: var(--f-heading);
+    font-weight: 600;
+    font-size: clamp(28px, 3.2vw, 46px);
+    line-height: 1.15;
+    letter-spacing: -0.045em;
+    text-wrap: balance;
+  }
+
+  @media (max-width: 1023px) {
+    .diff-head {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .diff-list {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .diff-list li,
+    .diff-list li + li {
+      padding: 28px 0;
+      border-left: 0;
+    }
+
+    .diff-list li + li {
+      border-top: 1px solid var(--c-line);
+    }
+
+    .diff-list li + li::before {
+      left: 0;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .diff-list {
+      margin-top: 32px;
+    }
+
+    .diff-list li {
+      grid-template-columns: 36px minmax(0, 1fr);
+    }
+
+    .diff-list h3 {
+      font-size: 18px;
+    }
+
+    .diff-hatch {
+      height: 10px;
+      margin-top: 32px;
+    }
+
+    /* The text spans the full width here, so the corner sits below it. */
+    .diff-summary-wrap {
+      margin-top: 28px;
+      padding: 8px 0 64px 18px;
+      border-left-width: 5px;
+    }
+
+    .diff-corner {
+      width: 56px;
+      height: 56px;
+    }
+  }
+</style>

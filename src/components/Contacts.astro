@@ -1,0 +1,232 @@
+---
+import ContactLink from "../shared/components/ContactLink.astro";
+import BrandText from "../shared/components/BrandText.astro";
+import { MODAL_DATA } from "../shared/data/modal_data";
+import { MEDIA_SECTION_DATA } from "../shared/data/mediaSectionData";
+import politicsPdf from "../assets/politics/politics.pdf";
+import Sticker from "../shared/components/Sticker.astro";
+
+const phone = MODAL_DATA.CONTACTS.find((c) => c.type === "phone");
+const messengers = MODAL_DATA.CONTACTS.filter((c) => c.type !== "phone");
+const year = new Date().getFullYear();
+---
+
+<section
+  class="contacts on-dark"
+  id="contacts"
+  aria-labelledby="contacts-title"
+>
+  <div class="container contacts-grid">
+    <div class="contacts-intro">
+      <p class="section-kicker">
+        <Sticker tone="paper" icon="arrow">Контакты</Sticker>
+      </p>
+      <h2 class="display-heading contacts-title" id="contacts-title">
+        <span class="heading-line">Обсудим</span>{" "}
+        <Sticker tone="acid" size="heading" shape="tape">ваш аппарат</Sticker>
+      </h2>
+      <p class="contacts-lead">
+        Заказ, комплектация и доставка — напрямую с продавцом.
+      </p>
+    </div>
+
+    <div class="contacts-channels">
+      {
+        phone && (
+          <a class="phone" href={phone.href}>
+            <span class="t-label">Телефон</span>
+            <span class="phone-number">{MODAL_DATA.PHONE_DISPLAY}</span>
+          </a>
+        )
+      }
+      <ul class="channel-list" aria-label="Мессенджеры">
+        {
+          messengers.map((contact) => (
+            <li>
+              <ContactLink
+                href={contact.href}
+                label={contact.label}
+                note={
+                  contact.type === "telegram"
+                    ? "@voxel44"
+                    : MODAL_DATA.PHONE_DISPLAY
+                }
+                tone="dark"
+              />
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+
+  <footer class="footer container">
+    <div class="footer-brand">
+      <span class="footer-logo">ГЕРА<sub>2</sub></span>
+      <span class="t-label">Аппараты для абразивного удаления коррозии</span>
+    </div>
+    <dl class="footer-legal">
+      <div>
+        <dt class="visually-hidden">Компания</dt>
+        <dd><BrandText text={MEDIA_SECTION_DATA.COMPANY_NAME} /> {year}</dd>
+      </div>
+      <div>
+        <dt class="visually-hidden">Продавец</dt>
+        <dd>{MEDIA_SECTION_DATA.COMPANY_OWNER}</dd>
+      </div>
+      <div>
+        <dt class="visually-hidden">УНП</dt>
+        <dd>{MEDIA_SECTION_DATA.OWNER_UNP}</dd>
+      </div>
+    </dl>
+    <div class="footer-links">
+      <a href={politicsPdf} target="_blank" rel="noopener noreferrer">
+        Политика обработки персональных данных (PDF)
+      </a>
+      <a class="footer-dev" href={MEDIA_SECTION_DATA.WEB_SOLUTIONS_LINK}>
+        {MEDIA_SECTION_DATA.WEB_SOLUTIONS}
+      </a>
+    </div>
+  </footer>
+</section>
+
+<style>
+  .contacts {
+    background: var(--c-ink);
+    color: var(--c-ivory);
+    padding-top: clamp(72px, 9vw, 136px);
+  }
+
+  .contacts-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+    gap: 48px 64px;
+    padding-bottom: clamp(56px, 7vw, 104px);
+  }
+
+  .contacts-intro {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .contacts-title {
+    margin-top: 12px;
+    font-size: clamp(32px, 4.1vw, 58px);
+  }
+
+  .contacts-lead {
+    color: var(--c-line);
+    max-width: 24em;
+  }
+
+  .contacts-channels {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding-top: 36px;
+  }
+
+  .phone {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--c-accent);
+    text-decoration: none;
+  }
+
+  .phone .t-label {
+    color: var(--c-line);
+  }
+
+  .phone-number {
+    font-family: var(--f-display);
+    font-weight: 400;
+    font-size: clamp(28px, 3.4vw, 49px);
+    line-height: 1;
+    letter-spacing: 0.045em;
+    word-spacing: 0.15em;
+    white-space: nowrap;
+    transition: color var(--t) var(--ease);
+  }
+
+  .phone:hover .phone-number {
+    color: var(--c-accent);
+  }
+
+  .footer {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1.2fr);
+    gap: 24px 48px;
+    padding-block: 32px 40px;
+    border-top: 1px solid var(--c-graphite);
+    font-size: 14px;
+    color: var(--c-line);
+  }
+
+  .footer-brand {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .footer-logo {
+    font-family: var(--f-condensed);
+    letter-spacing: 0.025em;
+    font-weight: 700;
+    font-size: 28px;
+    line-height: 1;
+    color: var(--c-ivory);
+  }
+
+  .footer-logo sub {
+    font-size: 0.55em;
+    color: var(--c-accent);
+    vertical-align: baseline;
+    position: relative;
+    top: -0.08em;
+  }
+
+  .footer-legal {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .footer-links {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .footer-links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--c-ivory);
+    text-underline-offset: 4px;
+  }
+
+  .footer-links .footer-dev {
+    color: var(--c-line);
+  }
+
+  @media (max-width: 899px) {
+    .contacts-grid,
+    .footer {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .contacts-channels {
+      padding-top: 0;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .phone-number {
+      font-size: clamp(25px, 8.4vw, 42px);
+    }
+  }
+</style>

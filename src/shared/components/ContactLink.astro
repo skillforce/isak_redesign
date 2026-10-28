@@ -1,57 +1,96 @@
 ---
+import Icon from "./Icon.astro";
 interface Props {
   href: string;
-  icon: string;
   label: string;
-  "data-contact-type": string;
-  "data-contact-base": string;
+  note?: string;
+  tone?: "light" | "dark";
+  "data-contact-type"?: string;
+  "data-contact-base"?: string;
 }
 
-const { href, icon, label, ...rest } = Astro.props;
+const { href, label, note, tone = "light", ...rest } = Astro.props;
+const external = href.startsWith("http");
 ---
 
-<a href={href} class="contact-link" target="_blank" rel="noopener noreferrer" data-contact-type={rest['data-contact-type']} data-contact-base={rest['data-contact-base']} >
-  <span class="icon" aria-hidden="true" set:html={icon} />
-  {label}
+<a
+  href={href}
+  class:list={["contact-link", `contact-link--${tone}`]}
+  target={external ? "_blank" : undefined}
+  rel={external ? "noopener noreferrer" : undefined}
+  data-contact-type={rest["data-contact-type"]}
+  data-contact-base={rest["data-contact-base"]}
+>
+  <span class="contact-text">
+    <span class="contact-label">{label}</span>
+    {note && <span class="contact-note">{note}</span>}
+  </span>
+  <span class="contact-arrow"><Icon size={18} /></span>
 </a>
 
 <style>
   .contact-link {
     display: flex;
     align-items: center;
-    gap: 10px;
-    text-decoration: underline;
-    font-family: "Sansation", sans-serif;
-    padding: 20px 15px;
-    width: 160px;
-    color: #ffffff;
-    border-radius: 8px;
-    transition: 0.3s ease-in-out;
-    font-weight: bold;
-    font-size: 22px;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 64px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--c-line);
+    text-decoration: none;
+    transition:
+      padding var(--t) var(--ease),
+      color var(--t) var(--ease);
+  }
+
+  .contact-link--dark {
+    border-bottom-color: var(--c-graphite);
+  }
+
+  .contact-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .contact-label {
+    font-weight: 600;
+    font-size: 18px;
+    line-height: 1.3;
+  }
+
+  .contact-note {
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--c-muted);
+  }
+
+  .contact-link--dark .contact-note {
+    color: var(--c-line);
+  }
+
+  .contact-arrow {
+    font-family: var(--f-mono);
+    font-size: 18px;
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    border: 1px solid currentColor;
+    transition:
+      background-color var(--t) var(--ease),
+      color var(--t) var(--ease);
+  }
+
+  .contact-link:hover .contact-arrow {
+    background: var(--c-accent);
+    border-color: var(--c-accent);
+    color: var(--c-ink);
   }
 
   .contact-link:hover {
-    opacity: 0.8;
-  }
-
-  .icon {
-    display: flex;
-    flex-shrink: 0;
-    width: 30px;
-    height: 30px;
-  }
-
-  .icon :global(svg) {
-    width: 100%;
-    height: 100%;
-  }
-
-  @media (max-width: 660px) {
-    .contact-link {
-      width: 175px;
-      font-size: 20px;
-      padding: 15px 15px;
-    }
+    padding-left: 6px;
   }
 </style>

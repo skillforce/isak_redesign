@@ -1,0 +1,320 @@
+---
+import { Image } from "astro:assets";
+import before from "../assets/metal/before.png";
+import after from "../assets/metal/after.png";
+import Icon from "../shared/components/Icon.astro";
+import { RESULT } from "../shared/data/pageContent";
+import Sticker from "../shared/components/Sticker.astro";
+---
+
+<section class="result" id="result" aria-labelledby="result-title">
+  <div class="container result-grid">
+    <div class="result-copy">
+      <h2 class="display-heading result-title" id="result-title">
+        <span class="heading-line">{RESULT.TITLE[0]}</span>{" "}
+        <Sticker tone="accent" size="heading" shape="tape" tilt="right"
+          >{RESULT.TITLE[1]}</Sticker
+        >
+      </h2>
+      <p class="result-desc">
+        <span class="result-desc--desktop">{RESULT.DESCRIPTION}</span><span
+          class="result-desc--mobile"
+          >Удаляет ржавчину, краску и загрязнения. Сохраняет геометрию и
+          прочность металла.</span
+        >
+      </p>
+      <a class="result-link" href="#video">
+        {RESULT.LINK}
+        <Icon name="arrow-right" />
+      </a>
+    </div>
+
+    <figure class="compare-figure">
+      <div class="compare" data-compare style="--pos: 50%">
+        <Image
+          src={after}
+          alt="Металлическая деталь после очистки аппаратом Гера2: ржавчина удалена, металл сохранён (иллюстрация)"
+          class="compare-layer"
+          widths={[600, 1000, 1536]}
+          sizes="(max-width: 767px) 92vw, 52vw"
+          format="webp"
+          quality={88}
+          loading="lazy"
+        />
+        <Image
+          src={before}
+          alt="Металлическая деталь с ржавчиной до обработки (иллюстрация)"
+          class="compare-layer compare-before"
+          widths={[600, 1000, 1536]}
+          sizes="(max-width: 767px) 92vw, 52vw"
+          format="webp"
+          quality={88}
+          loading="lazy"
+        />
+
+        <span class="compare-tag compare-tag--before" aria-hidden="true"
+          >До</span
+        >
+        <span class="compare-tag compare-tag--after" aria-hidden="true"
+          >После</span
+        >
+
+        <div class="compare-handle" aria-hidden="true">
+          <span class="compare-knob">
+            <Icon name="compare" size={20} />
+          </span>
+        </div>
+
+        <label class="visually-hidden" for="compare-range">
+          Сравнение «до» и «после», иллюстрация: положение разделителя
+        </label>
+        <input
+          class="compare-range"
+          id="compare-range"
+          type="range"
+          min="0"
+          max="100"
+          step="1"
+          value="50"
+          aria-valuetext="50% — до, 50% — после"
+          data-compare-range
+        />
+      </div>
+      <figcaption class="visually-hidden">
+        Иллюстрация: схема показывает характер обработки и не является
+        результатом испытаний.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLElement>("[data-compare]").forEach((root) => {
+    const range = root.querySelector<HTMLInputElement>("[data-compare-range]");
+    if (!range) return;
+
+    const set = (value: number) => {
+      const v = Math.min(100, Math.max(0, Math.round(value)));
+      root.style.setProperty("--pos", `${v}%`);
+      range.value = String(v);
+      range.setAttribute("aria-valuetext", `${v}% — до, ${100 - v}% — после`);
+    };
+
+    range.addEventListener("input", () => set(Number(range.value)));
+
+    // The full-size native range owns pointer and keyboard interaction.
+    // Do not add a second drag handler: it fights the browser's thumb capture.
+    set(Number(range.value));
+  });
+</script>
+
+<style>
+  .result {
+    padding-block: calc(33 * var(--unit)) calc(28 * var(--unit));
+  }
+  .result-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 347fr) minmax(0, 495fr);
+    gap: calc(30 * var(--unit));
+    align-items: start;
+  }
+  .result-copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-top: calc(2 * var(--unit));
+  }
+  .result-title {
+    font-size: calc(50 * var(--unit));
+  }
+  .result-desc {
+    margin-top: calc(24 * var(--unit));
+    font-size: calc(17 * var(--unit));
+    line-height: 1.25;
+    max-width: 22em;
+  }
+  .result-desc--mobile {
+    display: none;
+  }
+  .result-link {
+    margin-top: calc(11 * var(--unit));
+    display: inline-flex;
+    align-items: center;
+    gap: calc(12 * var(--unit));
+    min-height: calc(28 * var(--unit));
+    font-size: calc(16 * var(--unit));
+    text-decoration: none;
+    border-bottom: 1px solid var(--c-ink);
+    transition: color var(--t);
+  }
+  .result-link :global(.icon) {
+    width: calc(17 * var(--unit));
+    height: calc(17 * var(--unit));
+  }
+  .result-link:hover {
+    color: var(--c-accent);
+  }
+  .compare-figure {
+    margin: 0;
+  }
+  .compare {
+    position: relative;
+    aspect-ratio: 3 / 2;
+    background: var(--c-graphite);
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .compare:has(.compare-range:focus-visible) {
+    outline: 2px solid var(--c-ink);
+    outline-offset: 4px;
+  }
+  .compare :global(.compare-layer) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+  }
+  .compare :global(.compare-before) {
+    clip-path: inset(0 calc(100% - var(--pos)) 0 0);
+  }
+  .compare-tag {
+    position: absolute;
+    top: calc(14 * var(--unit));
+    padding: calc(3 * var(--unit)) calc(9 * var(--unit));
+    background: var(--c-ink);
+    color: var(--c-ivory);
+    font-size: calc(14 * var(--unit));
+    line-height: 1.2;
+    pointer-events: none;
+  }
+  .compare-tag--before {
+    left: calc(14 * var(--unit));
+  }
+  .compare-tag--after {
+    right: calc(12 * var(--unit));
+  }
+  .compare-handle {
+    position: absolute;
+    inset-block: 0;
+    left: var(--pos);
+    width: 2px;
+    margin-left: -1px;
+    background: var(--c-ivory);
+    pointer-events: none;
+  }
+  .compare-knob {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: calc(38 * var(--unit));
+    height: calc(38 * var(--unit));
+    transform: translate(-50%, -50%);
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--c-ink);
+    border-radius: 50%;
+    background: var(--c-white);
+    color: var(--c-ink);
+  }
+  .compare-knob :global(.icon) {
+    width: calc(20 * var(--unit));
+    height: calc(20 * var(--unit));
+  }
+  .compare-range {
+    --thumb-size: 44px;
+    appearance: none;
+    -webkit-appearance: none;
+    position: absolute;
+    z-index: 2;
+    inset-block: 0;
+    left: calc(var(--thumb-size) / -2);
+    width: calc(100% + var(--thumb-size));
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    opacity: 0;
+    cursor: ew-resize;
+    touch-action: pan-y;
+  }
+  .compare-range::-webkit-slider-runnable-track {
+    height: 100%;
+    background: transparent;
+  }
+  .compare-range::-webkit-slider-thumb {
+    appearance: none;
+    -webkit-appearance: none;
+    width: var(--thumb-size);
+    height: 100%;
+    background: transparent;
+    border: 0;
+  }
+  .compare-range::-moz-range-track {
+    height: 100%;
+    background: transparent;
+    border: 0;
+  }
+  .compare-range::-moz-range-thumb {
+    width: var(--thumb-size);
+    height: 100%;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+  @media (max-width: 767px) {
+    .result {
+      padding-block: calc(19 * var(--unit)) calc(30 * var(--unit));
+    }
+    .result-grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: calc(15 * var(--unit));
+    }
+    .result-copy {
+      gap: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--c-ink);
+    }
+    .result-title {
+      font-size: clamp(32px, 9.6vw, 60px);
+    }
+    .result-desc {
+      margin-top: 0;
+      font-size: 16px;
+      line-height: 1.45;
+      max-width: 29em;
+    }
+    .result-desc--desktop,
+    .result-link {
+      display: none;
+    }
+    .result-desc--mobile {
+      display: inline;
+    }
+    .compare {
+      aspect-ratio: 3 / 2;
+    }
+    .compare-tag {
+      top: 10px;
+      font-size: 12px;
+      padding: 3px 8px;
+    }
+    .compare-tag--before {
+      left: 10px;
+    }
+    .compare-tag--after {
+      right: 10px;
+    }
+    .compare-knob {
+      width: 34px;
+      height: 34px;
+    }
+    .compare-knob :global(.icon) {
+      width: 18px;
+      height: 18px;
+    }
+  }
+</style>

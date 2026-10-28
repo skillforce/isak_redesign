@@ -1,22 +1,66 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import Main from "../components/Main.astro";
-import Benefits from "../components/Benefits.astro";
-import Reasons from "../components/Reasons.astro";
-import Media from "../components/Media.astro";
+import Header from "../components/Header.astro";
+import Hero from "../components/Hero.astro";
+import Result from "../components/Result.astro";
+import VideoSection from "../components/VideoSection.astro";
+import Models from "../components/Models.astro";
+import ToolConfigurator from "../components/ToolConfigurator.astro";
+import HowItWorks from "../components/HowItWorks.astro";
+import Difference from "../components/Difference.astro";
+import Contacts from "../components/Contacts.astro";
 import PopUp from "../shared/components/Modal.astro";
 import WelcomeModal from "../shared/components/WelcomeModal.astro";
+import StructuredData from "../shared/components/StructuredData.astro";
+import BlastScrollbar from "../shared/components/BlastScrollbar.astro";
 import { MODAL_DATA } from "../shared/data/modal_data";
-import "../styles/reset.css";
+import {
+  heroImages,
+  HERO_DESKTOP_MEDIA,
+  HERO_DESKTOP_SIZES,
+  HERO_MOBILE_MEDIA,
+  HERO_MOBILE_SIZES,
+} from "../shared/utils/heroImages";
 ---
 
 <Layout>
+  <Fragment slot="head">
+    <StructuredData />
+    <!-- Start the LCP image download before the parser reaches <Hero>. -->
+    <link
+      rel="preload"
+      as="image"
+      type="image/avif"
+      media={HERO_MOBILE_MEDIA}
+      imagesrcset={heroImages.mobileAvif}
+      imagesizes={HERO_MOBILE_SIZES}
+      fetchpriority="high"
+    />
+    <link
+      rel="preload"
+      as="image"
+      type="image/avif"
+      media={HERO_DESKTOP_MEDIA}
+      imagesrcset={heroImages.desktopAvif}
+      imagesizes={HERO_DESKTOP_SIZES}
+      fetchpriority="high"
+    />
+  </Fragment>
   <WelcomeModal id={MODAL_DATA.WELCOME_MODAL_ID} />
   <PopUp id={MODAL_DATA.CONTACT_MODAL_ID} />
-  <Main />
-  <Benefits />
-  <Reasons />
-  <Media />
+  <a class="skip-link" href="#main">К содержанию</a>
+  <Header />
+  <main id="main">
+    <Hero />
+    <Result />
+    <Models />
+    <ToolConfigurator />
+    <VideoSection />
+    <HowItWorks />
+    <Difference />
+  </main>
+  <Contacts />
+  <BlastScrollbar />
 </Layout>
 
 <script>
@@ -25,13 +69,22 @@ import "../styles/reset.css";
 
   const WELCOME_MODAL_STORAGE_KEY = "welcome_modal_shown";
 
+  // free-astro-components renders an icon-only close button with no name.
+  document
+    .querySelectorAll<HTMLButtonElement>(".ac-modal-close:not([aria-label])")
+    .forEach((button) => button.setAttribute("aria-label", "Закрыть"));
+
   const welcomeModal = document.querySelector(
     `#${MODAL_DATA.WELCOME_MODAL_ID}`
   );
   if (welcomeModal) {
     welcomeModal.addEventListener("close", () => {
       document.body.style.overflow = "auto";
-      localStorage.setItem(WELCOME_MODAL_STORAGE_KEY, "1");
+      try {
+        localStorage.setItem(WELCOME_MODAL_STORAGE_KEY, "1");
+      } catch {
+        /* storage unavailable */
+      }
     });
 
     let shown = false;
@@ -66,7 +119,25 @@ import "../styles/reset.css";
     applyGeo((e as CustomEvent<{ isBY: boolean }>).detail.isBY)
   );
 
-  (async () => {
+  const GEO_STORAGE_KEY = "geo_is_by";
+
+  function setGeo(isBY: boolean) {
+    document.documentElement.dataset.isBy = isBY ? "1" : "0";
+    window.dispatchEvent(new CustomEvent("geo:by", { detail: { isBY } }));
+  }
+
+  async function detectGeo() {
+    let cached: string | null = null;
+    try {
+      cached = sessionStorage.getItem(GEO_STORAGE_KEY);
+    } catch {
+      /* storage unavailable */
+    }
+    if (cached !== null) {
+      setGeo(cached === "1");
+      return;
+    }
+
     try {
       const token = "cc6c23fd5592bb";
       const res = await fetch("https://ipinfo.io/json", {
@@ -75,11 +146,48 @@ import "../styles/reset.css";
       const data = await res.json();
       const isBY = data?.country === "BY";
 
-      document.documentElement.dataset.isBy = isBY ? "1" : "0";
-      window.dispatchEvent(new CustomEvent("geo:by", { detail: { isBY } }));
+      try {
+        sessionStorage.setItem(GEO_STORAGE_KEY, isBY ? "1" : "0");
+      } catch {
+        /* storage unavailable */
+      }
+      setGeo(isBY);
     } catch (e) {
       console.error("Geo check failed:", e);
       applyGeo(false);
     }
-  })();
+  }
+
+  // The result only toggles the configurator price, far below the fold, so
+  // keep the request off the critical path: wait for load, then idle time.
+  function scheduleGeo() {
+    if ("requestIdleCallback" in window) {
+      requestIdleCallback(() => detectGeo(), { timeout: 2000 });
+    } else {
+      setTimeout(detectGeo, 0);
+    }
+  }
+
+  if (document.readyState === "complete") {
+    scheduleGeo();
+  } else {
+    window.addEventListener("load", scheduleGeo, { once: true });
+  }
 </script>
+
+<style>
+  .skip-link {
+    position: absolute;
+    left: 16px;
+    top: -100px;
+    z-index: 100;
+    padding: 12px 16px;
+    background: var(--c-ink);
+    color: var(--c-ivory);
+    font-weight: 600;
+  }
+
+  .skip-link:focus {
+    top: 12px;
+  }
+</style>
