@@ -1,22 +1,8 @@
 ---
 // Only the latin + cyrillic subsets of weights the page actually renders.
+import "@fontsource-variable/golos-text/wght.css";
 import "@fontsource/oswald/latin-700.css";
 import "@fontsource/oswald/cyrillic-700.css";
-import "@fontsource/anton/latin-400.css";
-import "@fontsource/roboto/latin-400.css";
-import "@fontsource/roboto/cyrillic-400.css";
-import "@fontsource/roboto/latin-500.css";
-import "@fontsource/roboto/cyrillic-500.css";
-import "@fontsource/roboto/latin-600.css";
-import "@fontsource/roboto/cyrillic-600.css";
-import "@fontsource/roboto/latin-700.css";
-import "@fontsource/roboto/cyrillic-700.css";
-import "@fontsource/golos-text/latin-400.css";
-import "@fontsource/golos-text/cyrillic-400.css";
-import "@fontsource/golos-text/latin-600.css";
-import "@fontsource/golos-text/cyrillic-600.css";
-import "@fontsource/golos-text/latin-800.css";
-import "@fontsource/golos-text/cyrillic-800.css";
 import "@fontsource/ibm-plex-mono/latin-400.css";
 import "@fontsource/ibm-plex-mono/cyrillic-400.css";
 import "@fontsource/ibm-plex-mono/latin-500.css";
@@ -24,6 +10,7 @@ import "@fontsource/ibm-plex-mono/cyrillic-500.css";
 import "../styles/reset.css";
 import "../styles/global.css";
 import { getImage } from "astro:assets";
+import LazyImages from "../shared/components/LazyImages.astro";
 import heroDesktop from "../assets/metal/hero-desktop.avif";
 import { TOOL_OPTIONS, priceRange } from "../shared/data/mediaSectionData";
 
@@ -98,5 +85,6 @@ const ogImageUrl = new URL(ogImage.src, Astro.site);
   </head>
   <body id="page-content">
     <slot />
+    <LazyImages />
   </body>
 </html>

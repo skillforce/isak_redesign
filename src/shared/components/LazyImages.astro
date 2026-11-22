@@ -1,0 +1,43 @@
+---
+/**
+ * Scroll-driven image loading. Native loading="lazy" starts fetching
+ * 1250–2500px ahead, so on slow networks below-the-fold images compete with
+ * the hero. Here an image loads once it is within 150px of the viewport.
+ *
+ * Markup contract: <img data-lazy src={LAZY_PLACEHOLDER} data-src data-srcset?>
+ * and, inside a <picture>, <source data-srcset> instead of srcset.
+ */
+---
+
+<script>
+  const MARGIN = "150px 0px";
+
+  const load = (img: HTMLImageElement) => {
+    const picture = img.parentElement instanceof HTMLPictureElement ? img.parentElement : null;
+    picture?.querySelectorAll<HTMLSourceElement>("source[data-srcset]").forEach((source) => {
+      source.srcset = source.dataset.srcset!;
+      source.removeAttribute("data-srcset");
+    });
+    if (img.dataset.srcset) img.srcset = img.dataset.srcset;
+    if (img.dataset.src) img.src = img.dataset.src;
+    img.removeAttribute("data-lazy");
+  };
+
+  const images = document.querySelectorAll<HTMLImageElement>("img[data-lazy]");
+
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          observer.unobserve(entry.target);
+          load(entry.target as HTMLImageElement);
+        }
+      },
+      { rootMargin: MARGIN }
+    );
+    images.forEach((img) => observer.observe(img));
+  } else {
+    images.forEach(load);
+  }
+</script>

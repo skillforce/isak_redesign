@@ -1,35 +1,35 @@
-import { getImage } from "astro:assets";
 import heroDesktop from "../../assets/metal/hero-desktop.avif";
 import heroMobile from "../../assets/metal/hero-mobile.avif";
-
-// AVIF q56 and WebP q81 measure the same SSIM against the source (~0.95).
-const AVIF_QUALITY = 56;
-const WEBP_QUALITY = 81;
+import { avifSrcset, webpFallback, type ImageStep } from "./responsiveImage";
 
 export const HERO_MOBILE_MEDIA = "(max-width: 767px)";
 export const HERO_DESKTOP_MEDIA = "(min-width: 768px)";
 export const HERO_MOBILE_SIZES = "100vw";
-// The image column is ~49% of the viewport, capped by the 1440px layout.
-export const HERO_DESKTOP_SIZES = "min(49vw, 705px)";
+// The image column is ~49% of the viewport and stops growing at ~712px.
+export const HERO_DESKTOP_SIZES = "min(49vw, 712px)";
 
-const variant = async (
-  src: ImageMetadata,
-  widths: number[],
-  format: "avif" | "webp",
-  quality: number
-) => {
-  const image = await getImage({ src, widths, format, quality });
-  return image.srcSet.attribute;
-};
+// [width, quality]: lowest quality with SSIM >= 0.93 vs the original PNG.
+// Mobile covers 360–430px screens at DPR 1.75–3; desktop covers 380–712px at DPR 1–2.
+const MOBILE_STEPS: ImageStep[] = [
+  [480, 60],
+  [640, 56],
+  [720, 54],
+  [780, 52],
+  [860, 50],
+  [1024, 49],
+];
+const DESKTOP_STEPS: ImageStep[] = [
+  [400, 58],
+  [560, 54],
+  [720, 50],
+  [1024, 45],
+];
 
 export const heroImages = {
   width: heroDesktop.width,
   height: heroDesktop.height,
-  mobileAvif: await variant(heroMobile, [600, 900], "avif", AVIF_QUALITY),
-  mobileWebp: await variant(heroMobile, [600, 900], "webp", WEBP_QUALITY),
-  desktopAvif: await variant(heroDesktop, [480, 720, 1024], "avif", AVIF_QUALITY),
-  desktopWebp: await variant(heroDesktop, [480, 720, 1024], "webp", WEBP_QUALITY),
-  fallbackSrc: (
-    await getImage({ src: heroDesktop, width: 1024, format: "webp", quality: WEBP_QUALITY })
-  ).src,
+  mobileAvif: await avifSrcset(heroMobile, MOBILE_STEPS),
+  mobileWebp: await webpFallback(heroMobile, [720, 58]),
+  desktopAvif: await avifSrcset(heroDesktop, DESKTOP_STEPS),
+  desktopWebp: await webpFallback(heroDesktop, [1024, 39]),
 };

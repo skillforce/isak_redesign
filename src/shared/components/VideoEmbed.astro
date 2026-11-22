@@ -13,7 +13,12 @@ interface Props {
   hidden?: boolean;
 }
 
-import { Image } from "astro:assets";
+import { posterQuality } from "../data/imageQuality";
+import {
+  avifSrcset,
+  LAZY_PLACEHOLDER,
+  webpFallback,
+} from "../utils/responsiveImage";
 import { parseYouTubeId } from "../utils/youtube";
 
 const {
@@ -26,6 +31,13 @@ const {
 } = Astro.props;
 
 const parsed = parseYouTubeId(videoId);
+
+// Rendered 328–569px wide (92vw on phones, ~44vw on tablets/laptops, 570px max).
+const POSTER_SIZES = "(max-width: 767px) 92vw, (max-width: 1439px) 44vw, 570px";
+const posterImage = poster && {
+  avif: await avifSrcset(poster, posterQuality(poster).avif),
+  fallback: await webpFallback(poster, posterQuality(poster).webp),
+};
 let embedSrc: string | null = null;
 if (parsed) {
   const params = new URLSearchParams(parsed.query);
@@ -104,17 +116,20 @@ if (parsed) {
 >
   <div class="video-stage" data-youtube-stage>
     {
-      poster ? (
-        <Image
-          class="poster"
-          src={poster}
-          alt=""
-          widths={[640, 960, 1280, 1600]}
-          sizes="(max-width: 767px) 92vw, min(50vw, 720px)"
-          format="avif"
-          quality={70}
-          loading="lazy"
-        />
+      poster && posterImage ? (
+        <picture>
+          <source type="image/avif" data-srcset={posterImage.avif} sizes={POSTER_SIZES} />
+          <img
+            class="poster"
+            src={LAZY_PLACEHOLDER}
+            data-src={posterImage.fallback}
+            data-lazy
+            width={poster.width}
+            height={poster.height}
+            alt=""
+            decoding="async"
+          />
+        </picture>
       ) : (
         <div
           class="poster-bg"

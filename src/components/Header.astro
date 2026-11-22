@@ -295,7 +295,8 @@ import { NAV_ITEMS, HERO } from "../shared/data/pageContent";
 
     .logo {
       font-family: var(--f-body);
-      font-weight: 900;
+      /* 700 + text-stroke reproduces the former look (Roboto had no 900 loaded). */
+      font-weight: 700;
       font-size: calc(32 * var(--unit));
       transform: scaleX(1.1);
       letter-spacing: -0.035em;

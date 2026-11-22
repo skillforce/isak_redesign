@@ -9,10 +9,10 @@
   --c-white: #ffffff;
   --c-citron: #def266;
 
-  --f-display: "Anton", "Impact", sans-serif;
-  --f-heading: "Golos Text", sans-serif;
+  --f-display: "Oswald", "Arial Narrow", sans-serif;
+  --f-heading: "Golos Text Variable", "Golos Text", sans-serif;
   --f-condensed: "Oswald", "Arial Narrow", sans-serif;
-  --f-body: "Roboto", Arial, sans-serif;
+  --f-body: "Golos Text Variable", "Golos Text", Arial, sans-serif;
   --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 
   --unit: min(0.105708vw, 1.5222px);

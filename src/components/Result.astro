@@ -1,10 +1,53 @@
 ---
-import { Image } from "astro:assets";
 import before from "../assets/metal/before.avif";
 import after from "../assets/metal/after.avif";
 import Icon from "../shared/components/Icon.astro";
 import { RESULT } from "../shared/data/pageContent";
 import Sticker from "../shared/components/Sticker.astro";
+import {
+  avifSrcset,
+  LAZY_PLACEHOLDER,
+  webpFallback,
+  type ImageStep,
+} from "../shared/utils/responsiveImage";
+
+// Mobile: ~92vw on 360–430px screens at DPR 2–3. Desktop: 400–750px at DPR 1–2.
+const SIZES = "(max-width: 767px) 92vw, min(52vw, 750px)";
+
+// [width, quality]: lowest quality with SSIM >= 0.93 vs the original PNG.
+const AFTER_STEPS: ImageStep[] = [
+  [400, 54],
+  [560, 52],
+  [750, 49],
+  [1000, 45],
+  [1280, 42],
+  [1536, 39],
+];
+const BEFORE_STEPS: ImageStep[] = [
+  [400, 72],
+  [560, 67],
+  [750, 64],
+  [1000, 60],
+  [1280, 58],
+  [1536, 56],
+];
+
+const layers = [
+  {
+    avif: await avifSrcset(after, AFTER_STEPS),
+    fallback: await webpFallback(after, [1000, 23]),
+    meta: after,
+    className: "compare-layer",
+    alt: "Металлическая деталь после очистки аппаратом Гера2: ржавчина удалена, металл сохранён (иллюстрация)",
+  },
+  {
+    avif: await avifSrcset(before, BEFORE_STEPS),
+    fallback: await webpFallback(before, [1000, 82]),
+    meta: before,
+    className: "compare-layer compare-before",
+    alt: "Металлическая деталь с ржавчиной до обработки (иллюстрация)",
+  },
+];
 ---
 
 <section class="result" id="result" aria-labelledby="result-title">
@@ -31,26 +74,23 @@ import Sticker from "../shared/components/Sticker.astro";
 
     <figure class="compare-figure">
       <div class="compare" data-compare style="--pos: 50%">
-        <Image
-          src={after}
-          alt="Металлическая деталь после очистки аппаратом Гера2: ржавчина удалена, металл сохранён (иллюстрация)"
-          class="compare-layer"
-          widths={[600, 1000, 1536]}
-          sizes="(max-width: 767px) 92vw, 52vw"
-          format="webp"
-          quality={88}
-          loading="lazy"
-        />
-        <Image
-          src={before}
-          alt="Металлическая деталь с ржавчиной до обработки (иллюстрация)"
-          class="compare-layer compare-before"
-          widths={[600, 1000, 1536]}
-          sizes="(max-width: 767px) 92vw, 52vw"
-          format="webp"
-          quality={88}
-          loading="lazy"
-        />
+        {
+          layers.map((layer) => (
+            <picture>
+              <source type="image/avif" data-srcset={layer.avif} sizes={SIZES} />
+              <img
+                class={layer.className}
+                src={LAZY_PLACEHOLDER}
+                data-src={layer.fallback}
+                data-lazy
+                width={layer.meta.width}
+                height={layer.meta.height}
+                alt={layer.alt}
+                decoding="async"
+              />
+            </picture>
+          ))
+        }
 
         <span class="compare-tag compare-tag--before" aria-hidden="true"
           >До</span

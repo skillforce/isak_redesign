@@ -8,8 +8,24 @@ import Icon from "../shared/components/Icon.astro";
 import { MODAL_DATA } from "../shared/data/modal_data";
 import { CONFIGURATOR } from "../shared/data/pageContent";
 import Sticker from "../shared/components/Sticker.astro";
+import { thumbQuality } from "../shared/data/imageQuality";
+import {
+  avifDensitySrcset,
+  LAZY_PLACEHOLDER,
+  webpFallback,
+} from "../shared/utils/responsiveImage";
 
 const complectations = TOOL_OPTIONS[0].options;
+
+const thumb = async (image: ImageMetadata) => {
+  const quality = thumbQuality(image);
+  return {
+    avif: await avifDensitySrcset(image, quality.avif),
+    fallback: await webpFallback(image, quality.webp),
+  };
+};
+const toolThumbs = await Promise.all(TOOL_OPTIONS.map((tool) => thumb(tool.image)));
+const kitThumbs = await Promise.all(complectations.map((opt) => thumb(opt.optionImage)));
 ---
 
 <section
@@ -106,14 +122,18 @@ const complectations = TOOL_OPTIONS[0].options;
                     </span>
                   </span>
                   <span class="row-thumb" aria-hidden="true">
-                    <img
-                      src={tool.image.src}
-                      width={tool.image.width}
-                      height={tool.image.height}
-                      alt={`Пескоструйный аппарат Гера2 «${tool.toolName}»`}
-                      loading="lazy"
-                      decoding="async"
-                    />
+                    <picture>
+                      <source type="image/avif" data-srcset={toolThumbs[i].avif} />
+                      <img
+                        src={LAZY_PLACEHOLDER}
+                        data-src={toolThumbs[i].fallback}
+                        data-lazy
+                        width={tool.image.width}
+                        height={tool.image.height}
+                        alt={`Пескоструйный аппарат Гера2 «${tool.toolName}»`}
+                        decoding="async"
+                      />
+                    </picture>
                   </span>
                   <span class="row-state" aria-hidden="true">
                     Выбрано
@@ -146,14 +166,18 @@ const complectations = TOOL_OPTIONS[0].options;
                     </span>
                   </span>
                   <span class="row-thumb row-thumb--kit" aria-hidden="true">
-                    <img
-                      src={opt.optionImage.src}
-                      width={opt.optionImage.width}
-                      height={opt.optionImage.height}
-                      alt={`Комплектация Гера2: ${opt.text}`}
-                      loading="lazy"
-                      decoding="async"
-                    />
+                    <picture>
+                      <source type="image/avif" data-srcset={kitThumbs[i].avif} />
+                      <img
+                        src={LAZY_PLACEHOLDER}
+                        data-src={kitThumbs[i].fallback}
+                        data-lazy
+                        width={opt.optionImage.width}
+                        height={opt.optionImage.height}
+                        alt={`Комплектация Гера2: ${opt.text}`}
+                        decoding="async"
+                      />
+                    </picture>
                   </span>
                   <span class="row-state" aria-hidden="true">
                     Выбрано
@@ -819,6 +843,11 @@ const complectations = TOOL_OPTIONS[0].options;
     height: 112px;
     display: grid;
     place-items: center;
+  }
+
+  /* The <picture> wrapper must not become a grid item of its own. */
+  .row-thumb picture {
+    display: contents;
   }
 
   .row-thumb img {

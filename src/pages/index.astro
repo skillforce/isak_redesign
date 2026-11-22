@@ -26,6 +26,8 @@ import {
 <Layout>
   <Fragment slot="head">
     <StructuredData />
+    <!-- Geo lookup for BY/RU prices: open the connection early. -->
+    <link rel="preconnect" href="https://ipinfo.io" crossorigin />
     <!-- Start the LCP image download before the parser reaches <Hero>. -->
     <link
       rel="preload"
