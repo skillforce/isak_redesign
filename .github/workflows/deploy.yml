@@ -1,8 +1,7 @@
 name: Build and deploy
 
 on:
-  push:
-    branches: [main]
+  workflow_call:
   workflow_dispatch:
 
 concurrency:
@@ -11,9 +10,8 @@ concurrency:
 
 permissions:
   contents: read
-
+ 
 env:
-  # Docker Hub repository, e.g. "myuser/gera2-site". Set as a repository variable.
   IMAGE: ${{ vars.DOCKERHUB_IMAGE }}
 
 jobs:
