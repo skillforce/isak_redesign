@@ -1,6 +1,6 @@
 import { getImage } from "astro:assets";
-import heroDesktop from "../../assets/metal/hero-desktop.png";
-import heroMobile from "../../assets/metal/hero-mobile.png";
+import heroDesktop from "../../assets/metal/hero-desktop.avif";
+import heroMobile from "../../assets/metal/hero-mobile.avif";
 
 // AVIF q56 and WebP q81 measure the same SSIM against the source (~0.95).
 const AVIF_QUALITY = 56;
