@@ -1,12 +1,3 @@
-@font-face {
-  font-family: "Anton Cyrillic";
-  src: url("../assets/fonts/Anton-Cyrillic.ttf") format("truetype");
-  font-weight: 400 900;
-  font-style: normal;
-  font-display: swap;
-  unicode-range: U+0400-052F;
-}
-
 :root {
   --c-accent: #f03510;
   --c-accent-hover: #d92b0b;
@@ -18,7 +9,7 @@
   --c-white: #ffffff;
   --c-citron: #def266;
 
-  --f-display: "Anton Cyrillic", "Anton", "Impact", sans-serif;
+  --f-display: "Anton", "Impact", sans-serif;
   --f-heading: "Golos Text", sans-serif;
   --f-condensed: "Oswald", "Arial Narrow", sans-serif;
   --f-body: "Roboto", Arial, sans-serif;

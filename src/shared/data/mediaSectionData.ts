@@ -144,17 +144,6 @@ export const TOOL_OPTIONS: ToolOption[] = [
   },
 ];
 
-/**
- * Описание модели без фразы о компрессоре (она показывается отдельной колонкой).
- * Текст не меняется — только разбивается на части.
- */
-export function splitToolDescription(description: string) {
-  const index = description.indexOf("Производительность компрессора");
-  const main = (index >= 0 ? description.slice(0, index) : description).trim();
-  const flow = index >= 0 ? description.slice(index).trim() : "";
-  return { main, flow };
-}
-
 export type Currency = "BY" | "RU";
 export const CURRENCY_CODE: Record<Currency, "BYN" | "RUB"> = { BY: "BYN", RU: "RUB" };
 
