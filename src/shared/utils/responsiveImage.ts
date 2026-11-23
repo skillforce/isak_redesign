@@ -4,6 +4,23 @@ import { getImage } from "astro:assets";
 export type ImageStep = readonly [width: number, quality: number];
 
 /**
+ * Optional crop baked into every rendition: when the image is always shown
+ * through `object-fit: cover` in a box of a fixed aspect ratio, pixels the
+ * box always hides need not be downloaded.
+ */
+export interface ImageCrop {
+  /** Width / height of the output. */
+  aspect: number;
+  /** Which part to keep, as for `object-position` (e.g. "bottom"). */
+  position: string;
+}
+
+const geometry = (width: number, crop?: ImageCrop) =>
+  crop
+    ? { width, height: Math.round(width / crop.aspect), fit: "cover" as const, position: crop.position }
+    : { width };
+
+/**
  * Builds an AVIF srcset where every width has its own quality.
  *
  * Smaller renditions need a higher quality to keep the same fidelity, so a
@@ -11,10 +28,14 @@ export type ImageStep = readonly [width: number, quality: number];
  * small ones. The per-width qualities live next to each image and are the
  * lowest values that keep SSIM >= 0.93 (<= 7% loss) against the original PNG.
  */
-export async function avifSrcset(src: ImageMetadata, steps: readonly ImageStep[]) {
+export async function avifSrcset(
+  src: ImageMetadata,
+  steps: readonly ImageStep[],
+  crop?: ImageCrop
+) {
   const candidates = await Promise.all(
     steps.map(async ([width, quality]) => {
-      const image = await getImage({ src, width, format: "avif", quality });
+      const image = await getImage({ src, ...geometry(width, crop), format: "avif", quality });
       return `${image.src} ${width}w`;
     })
   );
@@ -22,8 +43,12 @@ export async function avifSrcset(src: ImageMetadata, steps: readonly ImageStep[]
 }
 
 /** Single WebP file for the few browsers without AVIF support. */
-export async function webpFallback(src: ImageMetadata, [width, quality]: ImageStep) {
-  return (await getImage({ src, width, format: "webp", quality })).src;
+export async function webpFallback(
+  src: ImageMetadata,
+  [width, quality]: ImageStep,
+  crop?: ImageCrop
+) {
+  return (await getImage({ src, ...geometry(width, crop), format: "webp", quality })).src;
 }
 
 /**

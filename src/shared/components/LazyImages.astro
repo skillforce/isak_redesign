@@ -2,7 +2,9 @@
 /**
  * Scroll-driven image loading. Native loading="lazy" starts fetching
  * 1250–2500px ahead, so on slow networks below-the-fold images compete with
- * the hero. Here an image loads once it is within 150px of the viewport.
+ * the hero. Here an image starts loading one viewport height before it
+ * scrolls into view: late enough to keep the first load light, early enough
+ * that a slow connection has a screen's worth of scrolling to finish it.
  *
  * Markup contract: <img data-lazy src={LAZY_PLACEHOLDER} data-src data-srcset?>
  * and, inside a <picture>, <source data-srcset> instead of srcset.
@@ -10,7 +12,8 @@
 ---
 
 <script>
-  const MARGIN = "150px 0px";
+  // One viewport height ahead (and behind, for upward scrolling).
+  const MARGIN = "100% 0px";
 
   const load = (img: HTMLImageElement) => {
     const picture = img.parentElement instanceof HTMLPictureElement ? img.parentElement : null;
